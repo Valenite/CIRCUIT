@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #070a12;
+  color: #f1f5f9;
+  user-select: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom Cyberpunk Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #06b6d4;
+}
+
+/* Animated Neon Wire Electrons */
+@keyframes neon-electron-flow {
+  0% {
+    stroke-dashoffset: 32;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.wire-animated {
+  stroke-dasharray: 6 10;
+  animation: neon-electron-flow 0.75s linear infinite;
+  filter: drop-shadow(0 0 4px #00f0ff);
+}
+
+.wire-animated-reverse {
+  stroke-dasharray: 6 10;
+  animation: neon-electron-flow 0.75s linear infinite reverse;
+  filter: drop-shadow(0 0 4px #00f0ff);
+}
+
+/* Glow Utilities */
+.neon-glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+}
+.neon-glow-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.25);
+}
+.neon-glow-emerald {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+}
