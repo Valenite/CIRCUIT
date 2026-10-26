@@ -67,9 +67,22 @@ export function solveCircuit(
       union(`${comp.id}:bb_row1_a`, `${comp.id}:bb_row1_b`);
       union(`${comp.id}:bb_row2_a`, `${comp.id}:bb_row2_b`);
       union(`${comp.id}:bb_row3_a`, `${comp.id}:bb_row3_b`);
+      union(`${comp.id}:bb_row4_a`, `${comp.id}:bb_row4_b`);
     } else if (comp.type === 'breadboard_half') {
+      // Connect top and bottom power rails along their lengths
+      union(`${comp.id}:rail_pos_1`, `${comp.id}:rail_pos_top_r`);
+      union(`${comp.id}:rail_neg_1`, `${comp.id}:rail_neg_top_r`);
+      union(`${comp.id}:rail_pos_2`, `${comp.id}:rail_pos_bot_l`);
+      union(`${comp.id}:rail_neg_2`, `${comp.id}:rail_neg_bot_l`);
+      // Also connect top to bottom rails for standard breadboard power distribution
       union(`${comp.id}:rail_pos_1`, `${comp.id}:rail_pos_2`);
       union(`${comp.id}:rail_neg_1`, `${comp.id}:rail_neg_2`);
+      // Connect terminal rows (columns across center trough)
+      union(`${comp.id}:bb_r1`, `${comp.id}:bb_r1_b`);
+      union(`${comp.id}:bb_r2`, `${comp.id}:bb_r2_b`);
+      union(`${comp.id}:bb_r3`, `${comp.id}:bb_r3_b`);
+      union(`${comp.id}:bb_r4`, `${comp.id}:bb_r4_b`);
+      union(`${comp.id}:bb_r5`, `${comp.id}:bb_r5_b`);
     } else if (comp.type === 'push_button') {
       // Connect tactile switch pins only when the button is pressed (ON)
       // When pressed, all 4 pins connect together so any wiring orientation works

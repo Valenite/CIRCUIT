@@ -572,6 +572,37 @@ export const SchematicComponent: React.FC<Props> = ({
         );
       }
 
+      case 'breadboard_half': {
+        return (
+          <g>
+            <rect x="10" y="10" width="140" height="120" rx="4" fill="#090d16" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 2" />
+            <line x1="10" y1="30" x2="150" y2="30" stroke="#ef4444" strokeWidth="1.5" />
+            <line x1="10" y1="110" x2="150" y2="110" stroke="#3b82f6" strokeWidth="1.5" />
+            <text x="80" y="65" fill="#38bdf8" fontSize="10" fontWeight="bold" textAnchor="middle">
+              BREADBOARD
+            </text>
+            <text x="80" y="80" fill="#94a3b8" fontSize="8" textAnchor="middle">
+              400 TIE-POINTS
+            </text>
+          </g>
+        );
+      }
+
+      case 'breadboard_mini': {
+        return (
+          <g>
+            <rect x="10" y="10" width="100" height="100" rx="4" fill="#090d16" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 2" />
+            <line x1="10" y1="25" x2="110" y2="25" stroke="#ef4444" strokeWidth="1.5" />
+            <text x="60" y="55" fill="#38bdf8" fontSize="9" fontWeight="bold" textAnchor="middle">
+              MINI BB
+            </text>
+            <text x="60" y="70" fill="#94a3b8" fontSize="7.5" textAnchor="middle">
+              170 TIE-POINTS
+            </text>
+          </g>
+        );
+      }
+
       // Default box
       default:
         return (

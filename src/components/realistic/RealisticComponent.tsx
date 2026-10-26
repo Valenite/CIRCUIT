@@ -1229,6 +1229,158 @@ export const RealisticComponent: React.FC<Props> = ({
         );
       }
 
+      // ================= BREADBOARDS =================
+      case 'breadboard_half': {
+        const powerXs = [30, 50, 70, 90, 110, 130, 150, 170, 190, 210, 230];
+        const terminalXs = [35, 55, 75, 95, 115, 135, 155, 175, 195, 215, 235];
+        const topBankYs = [80, 92, 104, 116, 128];
+        const botBankYs = [152, 164, 176, 188, 200];
+        const topLetters = ['a', 'b', 'c', 'd', 'e'];
+        const botLetters = ['f', 'g', 'h', 'i', 'j'];
+
+        return (
+          <g>
+            {/* Interlocking tabs and notches on edges */}
+            <rect x="2" y="115" width="4" height="40" rx="1.5" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="254" y="115" width="4" height="40" rx="1.5" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="105" y="2" width="50" height="4" rx="1.5" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+            <rect x="105" y="274" width="50" height="4" rx="1.5" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1" />
+
+            {/* Main Breadboard ABS Plastic Chassis */}
+            <rect x="6" y="6" width="248" height="268" rx="8" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2.5" />
+            <rect x="10" y="10" width="240" height="260" rx="6" fill="none" stroke="#e2e8f0" strokeWidth="1" />
+
+            {/* TOP POWER RAILS */}
+            {/* Positive (+) Red Line */}
+            <line x1="22" y1="28" x2="238" y2="28" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" />
+            <text x="14" y="32" fill="#ef4444" fontSize="13" fontWeight="bold" textAnchor="middle">+</text>
+            <text x="246" y="32" fill="#ef4444" fontSize="13" fontWeight="bold" textAnchor="middle">+</text>
+
+            {/* Negative (-) Blue Line */}
+            <line x1="22" y1="52" x2="238" y2="52" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
+            <text x="14" y="55" fill="#3b82f6" fontSize="15" fontWeight="bold" textAnchor="middle">-</text>
+            <text x="246" y="55" fill="#3b82f6" fontSize="15" fontWeight="bold" textAnchor="middle">-</text>
+
+            {/* Top Power Rail Contact Holes */}
+            {powerXs.map((x) => (
+              <React.Fragment key={`top_p_${x}`}>
+                <rect x={x - 2.5} y={25.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.6" />
+                <circle cx={x} cy={28} r="0.8" fill="#64748b" />
+                <rect x={x - 2.5} y={49.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.6" />
+                <circle cx={x} cy={52} r="0.8" fill="#64748b" />
+              </React.Fragment>
+            ))}
+
+            {/* Column Indices at Top */}
+            <text x="35" y="72" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">1</text>
+            <text x="75" y="72" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">5</text>
+            <text x="115" y="72" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">10</text>
+            <text x="155" y="72" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">15</text>
+            <text x="195" y="72" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">20</text>
+            <text x="235" y="72" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">25</text>
+
+            {/* TOP BANK TERMINAL SOCKETS (Rows a-e) */}
+            {topBankYs.map((y, rowIdx) => (
+              <React.Fragment key={`tb_row_${y}`}>
+                <text x="16" y={y + 2} fill="#94a3b8" fontSize="6.5" fontWeight="bold" textAnchor="middle">{topLetters[rowIdx]}</text>
+                <text x="244" y={y + 2} fill="#94a3b8" fontSize="6.5" fontWeight="bold" textAnchor="middle">{topLetters[rowIdx]}</text>
+                {terminalXs.map((x) => (
+                  <g key={`tb_hole_${x}_${y}`}>
+                    <rect x={x - 2.5} y={y - 2.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.5" />
+                    <circle cx={x} cy={y} r="0.8" fill="#64748b" />
+                  </g>
+                ))}
+              </React.Fragment>
+            ))}
+
+            {/* CENTER DIP IC DIVIDER TROUGH */}
+            <rect x="14" y="136" width="232" height="8" rx="2" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="0.8" />
+            <text x="130" y="142" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle" letterSpacing="1.5">
+              CIRCUIT CRAFT 400
+            </text>
+
+            {/* BOTTOM BANK TERMINAL SOCKETS (Rows f-j) */}
+            {botBankYs.map((y, rowIdx) => (
+              <React.Fragment key={`bb_row_${y}`}>
+                <text x="16" y={y + 2} fill="#94a3b8" fontSize="6.5" fontWeight="bold" textAnchor="middle">{botLetters[rowIdx]}</text>
+                <text x="244" y={y + 2} fill="#94a3b8" fontSize="6.5" fontWeight="bold" textAnchor="middle">{botLetters[rowIdx]}</text>
+                {terminalXs.map((x) => (
+                  <g key={`bb_hole_${x}_${y}`}>
+                    <rect x={x - 2.5} y={y - 2.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.5" />
+                    <circle cx={x} cy={y} r="0.8" fill="#64748b" />
+                  </g>
+                ))}
+              </React.Fragment>
+            ))}
+
+            {/* Column Indices at Bottom */}
+            <text x="35" y="212" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">1</text>
+            <text x="75" y="212" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">5</text>
+            <text x="115" y="212" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">10</text>
+            <text x="155" y="212" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">15</text>
+            <text x="195" y="212" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">20</text>
+            <text x="235" y="212" fill="#94a3b8" fontSize="6" fontWeight="bold" textAnchor="middle">25</text>
+
+            {/* BOTTOM POWER RAILS */}
+            {/* Negative (-) Blue Line */}
+            <line x1="22" y1="228" x2="238" y2="228" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
+            <text x="14" y="231" fill="#3b82f6" fontSize="15" fontWeight="bold" textAnchor="middle">-</text>
+            <text x="246" y="231" fill="#3b82f6" fontSize="15" fontWeight="bold" textAnchor="middle">-</text>
+
+            {/* Positive (+) Red Line */}
+            <line x1="22" y1="252" x2="238" y2="252" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" />
+            <text x="14" y="256" fill="#ef4444" fontSize="13" fontWeight="bold" textAnchor="middle">+</text>
+            <text x="246" y="256" fill="#ef4444" fontSize="13" fontWeight="bold" textAnchor="middle">+</text>
+
+            {/* Bottom Power Rail Contact Holes */}
+            {powerXs.map((x) => (
+              <React.Fragment key={`bot_p_${x}`}>
+                <rect x={x - 2.5} y={225.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.6" />
+                <circle cx={x} cy={228} r="0.8" fill="#64748b" />
+                <rect x={x - 2.5} y={249.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.6" />
+                <circle cx={x} cy={252} r="0.8" fill="#64748b" />
+              </React.Fragment>
+            ))}
+          </g>
+        );
+      }
+
+      case 'breadboard_mini': {
+        const miniLeftXs = [25, 40, 55, 70];
+        const miniRightXs = [110, 125, 140, 155];
+        const miniYs = [45, 65, 85, 105, 125, 145, 165, 185, 205];
+
+        return (
+          <g>
+            {/* Mini Breadboard Plastic Housing */}
+            <rect x="6" y="6" width="168" height="228" rx="8" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+            <rect x="10" y="10" width="160" height="220" rx="6" fill="none" stroke="#e2e8f0" strokeWidth="1" />
+
+            {/* Top Power / GND Rail Label */}
+            <text x="18" y="26" fill="#ef4444" fontSize="11" fontWeight="bold">+</text>
+            <line x1="28" y1="22" x2="148" y2="22" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="3 3" />
+            <text x="162" y="26" fill="#3b82f6" fontSize="13" fontWeight="bold">-</text>
+
+            {/* Vertical Center Divider Groove */}
+            <rect x="88" y="38" width="4" height="172" rx="1" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="0.6" />
+
+            {/* Socket Holes */}
+            {miniYs.map((y, rowIdx) => (
+              <React.Fragment key={`mini_row_${y}`}>
+                <text x="12" y={y + 2.5} fill="#94a3b8" fontSize="5.5" fontWeight="bold" textAnchor="middle">{rowIdx + 1}</text>
+                <text x="168" y={y + 2.5} fill="#94a3b8" fontSize="5.5" fontWeight="bold" textAnchor="middle">{rowIdx + 1}</text>
+                {miniLeftXs.map((x) => (
+                  <rect key={`ml_${x}_${y}`} x={x - 2.5} y={y - 2.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.5" />
+                ))}
+                {miniRightXs.map((x) => (
+                  <rect key={`mr_${x}_${y}`} x={x - 2.5} y={y - 2.5} width="5" height="5" rx="1" fill="#0f172a" stroke="#cbd5e1" strokeWidth="0.5" />
+                ))}
+              </React.Fragment>
+            ))}
+          </g>
+        );
+      }
+
       default:
         return (
           <rect x="5" y="5" width="60" height="40" rx="6" fill="#1e293b" stroke="#06b6d4" strokeWidth="1.5" />
