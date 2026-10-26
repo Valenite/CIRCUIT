@@ -17,6 +17,88 @@ export interface AiComponentSpec {
 
 // Built-in specs for hundreds of popular robotics, IoT, and maker components
 export const AI_KNOWLEDGE_BASE: Record<string, AiComponentSpec> = {
+  // ================= MOTORS & ACTUATORS =================
+  n20: {
+    type: 'n20_motor',
+    title: 'N20 Micro Metal Gear Motor',
+    category: 'Modules',
+    description: 'High-torque micro 6V DC metal geared motor with brass gearbox and D-shaft',
+    width: 140,
+    height: 75,
+    schematicWidth: 90,
+    schematicHeight: 70,
+    defaultProperties: { voltage: 6, gearRatio: '1:50' },
+    pins: [
+      { id: 'm_pos', name: 'M+ (Motor Terminal 1)', relX: 18, relY: 28, schematicRelX: 20, schematicRelY: 20, isPositive: true },
+      { id: 'm_neg', name: 'M- (Motor Terminal 2)', relX: 18, relY: 48, schematicRelX: 20, schematicRelY: 50, isNegative: true },
+    ],
+  },
+  n20motor: {
+    type: 'n20_motor',
+    title: 'N20 Micro Metal Gear Motor',
+    category: 'Modules',
+    description: 'High-torque micro 6V DC metal geared motor with brass gearbox and D-shaft',
+    width: 140,
+    height: 75,
+    schematicWidth: 90,
+    schematicHeight: 70,
+    defaultProperties: { voltage: 6, gearRatio: '1:50' },
+    pins: [
+      { id: 'm_pos', name: 'M+ (Motor Terminal 1)', relX: 18, relY: 28, schematicRelX: 20, schematicRelY: 20, isPositive: true },
+      { id: 'm_neg', name: 'M- (Motor Terminal 2)', relX: 18, relY: 48, schematicRelX: 20, schematicRelY: 50, isNegative: true },
+    ],
+  },
+
+  // ================= BIO & SPECIAL SENSORS =================
+  emg: {
+    type: 'emg_sensor',
+    title: 'EMG Muscle Activity Sensor (MyoWare)',
+    category: 'Sensors',
+    description: 'Electromyography bio-potential muscle activity sensor with analog envelope output',
+    width: 120,
+    height: 90,
+    schematicWidth: 100,
+    schematicHeight: 80,
+    defaultProperties: { stimulusValue: 40, voltage: 3.3 },
+    pins: [
+      { id: 'sig', name: 'SIG (Analog Out)', relX: 25, relY: 15, schematicRelX: 20, schematicRelY: 15, isAnalog: true },
+      { id: 'vcc', name: '+Vs (+3.3V-5V)', relX: 60, relY: 15, schematicRelX: 50, schematicRelY: 15, isPositive: true },
+      { id: 'gnd', name: 'GND (Ground)', relX: 95, relY: 15, schematicRelX: 80, schematicRelY: 15, isNegative: true },
+    ],
+  },
+  emgsensor: {
+    type: 'emg_sensor',
+    title: 'EMG Muscle Activity Sensor (MyoWare)',
+    category: 'Sensors',
+    description: 'Electromyography bio-potential muscle activity sensor with analog envelope output',
+    width: 120,
+    height: 90,
+    schematicWidth: 100,
+    schematicHeight: 80,
+    defaultProperties: { stimulusValue: 40, voltage: 3.3 },
+    pins: [
+      { id: 'sig', name: 'SIG (Analog Out)', relX: 25, relY: 15, schematicRelX: 20, schematicRelY: 15, isAnalog: true },
+      { id: 'vcc', name: '+Vs (+3.3V-5V)', relX: 60, relY: 15, schematicRelX: 50, schematicRelY: 15, isPositive: true },
+      { id: 'gnd', name: 'GND (Ground)', relX: 95, relY: 15, schematicRelX: 80, schematicRelY: 15, isNegative: true },
+    ],
+  },
+  myoware: {
+    type: 'emg_sensor',
+    title: 'EMG Muscle Activity Sensor (MyoWare)',
+    category: 'Sensors',
+    description: 'Electromyography bio-potential muscle activity sensor with analog envelope output',
+    width: 120,
+    height: 90,
+    schematicWidth: 100,
+    schematicHeight: 80,
+    defaultProperties: { stimulusValue: 40, voltage: 3.3 },
+    pins: [
+      { id: 'sig', name: 'SIG (Analog Out)', relX: 25, relY: 15, schematicRelX: 20, schematicRelY: 15, isAnalog: true },
+      { id: 'vcc', name: '+Vs (+3.3V-5V)', relX: 60, relY: 15, schematicRelX: 50, schematicRelY: 15, isPositive: true },
+      { id: 'gnd', name: 'GND (Ground)', relX: 95, relY: 15, schematicRelX: 80, schematicRelY: 15, isNegative: true },
+    ],
+  },
+
   // ================= MOTOR DRIVERS =================
   tb6612fng: {
     type: 'tb6612fng',

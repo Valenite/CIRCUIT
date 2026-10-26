@@ -41,6 +41,8 @@ interface Props {
   onDeleteSelected: () => void;
   defaultRoutingMode?: WireRoutingType;
   gridSnap?: boolean;
+  /** Called when a component is clicked; passes screen-space center of the component */
+  onComponentClickedScreen?: (id: string, screenX: number, screenY: number) => void;
 }
 
 export const Canvas: React.FC<Props> = ({
@@ -703,6 +705,7 @@ export const Canvas: React.FC<Props> = ({
                     x: coords.x - comp.x,
                     y: coords.y - comp.y,
                   });
+
                 }}
                 className="cursor-move"
               >

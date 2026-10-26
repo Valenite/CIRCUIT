@@ -834,6 +834,182 @@ export const RealisticComponent: React.FC<Props> = ({
         );
       }
 
+      // ================= EXPANDED SENSORS & ACTUATORS =================
+      case 'emg_sensor': {
+        const isLit = output.powered;
+        return (
+          <g>
+            {/* Red Medical Grade PCB */}
+            <rect x="5" y="5" width="110" height="80" rx="8" fill="#881337" stroke="#be123c" strokeWidth="2" />
+            {/* Gold Muscle Contact Electrodes (Snap connectors) */}
+            <circle cx="28" cy="45" r="14" fill="#d97706" stroke="#fbbf24" strokeWidth="2" />
+            <circle cx="28" cy="45" r="7" fill="#78350f" />
+            <circle cx="82" cy="45" r="14" fill="#d97706" stroke="#fbbf24" strokeWidth="2" />
+            <circle cx="82" cy="45" r="7" fill="#78350f" />
+            {/* Analog Front-End IC (Instrumentation Amp) */}
+            <rect x="47" y="35" width="16" height="20" rx="1.5" fill="#0f172a" stroke="#334155" />
+            <circle cx="50" cy="39" r="1" fill="#94a3b8" />
+            {/* Silkscreen Brand & Labels */}
+            <text x="55" y="24" fill="#fecdd3" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              MYOWARE EMG
+            </text>
+            <text x="55" y="70" fill="#fda4af" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+              MUSCLE SENSOR
+            </text>
+            {/* Live Flex Activity LED */}
+            <circle
+              cx="98"
+              cy="22"
+              r="3"
+              fill={isLit ? '#22c55e' : '#475569'}
+              filter={isLit ? 'drop-shadow(0 0 5px #22c55e)' : 'none'}
+            />
+            {/* Solder Header Pins at top */}
+            <circle cx="25" cy="15" r="3.5" fill="#090d16" stroke="#fbbf24" strokeWidth="1.5" />
+            <text x="25" y="9" fill="#fecdd3" fontSize="6" fontWeight="bold" textAnchor="middle">SIG</text>
+            <circle cx="60" cy="15" r="3.5" fill="#090d16" stroke="#fbbf24" strokeWidth="1.5" />
+            <text x="60" y="9" fill="#fecdd3" fontSize="6" fontWeight="bold" textAnchor="middle">+Vs</text>
+            <circle cx="95" cy="15" r="3.5" fill="#090d16" stroke="#fbbf24" strokeWidth="1.5" />
+            <text x="95" y="9" fill="#fecdd3" fontSize="6" fontWeight="bold" textAnchor="middle">GND</text>
+          </g>
+        );
+      }
+
+      case 'n20_motor': {
+        const isSpinning = output.powered && (output.rpm ?? 0) > 0;
+        return (
+          <g>
+            {/* Cylindrical Silver DC Motor Body */}
+            <rect x="5" y="18" width="60" height="38" rx="6" fill="#94a3b8" stroke="#475569" strokeWidth="1.5" />
+            {/* Rear Motor Cap & Solder Lugs */}
+            <rect x="2" y="24" width="6" height="26" rx="2" fill="#334155" />
+            <line x1="2" y1="28" x2="18" y2="28" stroke="#cbd5e1" strokeWidth="2.5" />
+            <line x1="2" y1="48" x2="18" y2="48" stroke="#cbd5e1" strokeWidth="2.5" />
+            {/* Metallic reflections */}
+            <line x1="12" y1="23" x2="55" y2="23" stroke="#f1f5f9" strokeWidth="1.5" opacity="0.6" />
+            <line x1="12" y1="49" x2="55" y2="49" stroke="#334155" strokeWidth="1.5" opacity="0.6" />
+            {/* Brass Micro Gearbox */}
+            <rect x="65" y="16" width="38" height="42" rx="3" fill="#ca8a04" stroke="#a16207" strokeWidth="1.5" />
+            {/* Gearbox Screw Fasteners */}
+            <circle cx="70" cy="22" r="1.5" fill="#713f12" />
+            <circle cx="70" cy="52" r="1.5" fill="#713f12" />
+            <circle cx="97" cy="22" r="1.5" fill="#713f12" />
+            <circle cx="97" cy="52" r="1.5" fill="#713f12" />
+            {/* Front Bearing Bushing */}
+            <rect x="103" y="30" width="8" height="14" rx="2" fill="#e2e8f0" stroke="#94a3b8" />
+            {/* Steel D-Shaft */}
+            <rect x="111" y="32" width="22" height="10" rx="1.5" fill="#e2e8f0" stroke="#64748b" strokeWidth="1.5" />
+            {/* D-Shaft Flat Cutout */}
+            <line x1="114" y1="34" x2="131" y2="34" stroke="#94a3b8" strokeWidth="1.5" />
+            {/* Rotation indicator or Motion Blur when spinning */}
+            {isSpinning && (
+              <g transform="translate(122, 37)">
+                <circle cx="0" cy="0" r="12" fill="none" stroke="#38bdf8" strokeWidth="2" strokeDasharray="6 4" className="animate-spin" />
+              </g>
+            )}
+            <text x="35" y="41" fill="#1e293b" fontSize="8" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+              N20 6V
+            </text>
+            <text x="84" y="39" fill="#451a03" fontSize="7" fontWeight="bold" fontFamily="monospace" textAnchor="middle">
+              1:50
+            </text>
+          </g>
+        );
+      }
+
+      case 'arduino_nano': {
+        return (
+          <g>
+            {/* Navy Blue PCB */}
+            <rect x="5" y="5" width="100" height="170" rx="6" fill="#005d5f" stroke="#003e40" strokeWidth="2" />
+            {/* Mini-USB Port */}
+            <rect x="36" y="2" width="28" height="22" rx="2" fill="#cbd5e1" stroke="#64748b" />
+            <rect x="42" y="4" width="16" height="8" fill="#1e293b" />
+            {/* Reset button */}
+            <rect x="45" y="75" width="10" height="10" rx="2" fill="#475569" stroke="#64748b" />
+            <circle cx="50" cy="80" r="2.5" fill="#f8fafc" />
+            {/* ATmega328P TQFP square chip */}
+            <rect x="38" y="98" width="24" height="24" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1.5" />
+            <circle cx="42" cy="102" r="1" fill="#94a3b8" />
+            {/* 16MHz Crystal */}
+            <rect x="41" y="52" width="18" height="8" rx="2" fill="#e2e8f0" stroke="#94a3b8" />
+            {/* Brand Text */}
+            <text x="50" y="42" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">NANO</text>
+            <text x="50" y="140" fill="#a5f3fc" fontSize="7.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">V3.0</text>
+            {/* Pin Header strips */}
+            <rect x="10" y="20" width="10" height="150" rx="1.5" fill="#0f172a" />
+            <rect x="90" y="20" width="10" height="150" rx="1.5" fill="#0f172a" />
+          </g>
+        );
+      }
+
+      case 'raspberry_pi_pico': {
+        return (
+          <g>
+            {/* Raspberry Pi Green PCB */}
+            <rect x="5" y="5" width="110" height="180" rx="6" fill="#15803d" stroke="#166534" strokeWidth="2" />
+            {/* Micro-USB Port */}
+            <rect x="42" y="2" width="26" height="18" rx="2" fill="#cbd5e1" stroke="#64748b" />
+            {/* White BOOTSEL button */}
+            <rect x="47" y="55" width="16" height="10" rx="2" fill="#f8fafc" stroke="#94a3b8" />
+            <text x="55" y="63" fill="#166534" fontSize="5.5" fontWeight="bold" textAnchor="middle">BOOT</text>
+            {/* RP2040 Chip */}
+            <rect x="41" y="80" width="28" height="28" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+            <text x="55" y="96" fill="#ffffff" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="monospace">RP2040</text>
+            {/* Flash Memory Chip */}
+            <rect x="43" y="125" width="24" height="16" rx="1.5" fill="#1e293b" />
+            {/* Silkscreen text */}
+            <text x="55" y="38" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">Raspberry Pi</text>
+            <text x="55" y="47" fill="#bbf7d0" fontSize="7" fontWeight="bold" textAnchor="middle">Pico</text>
+            {/* Dual header strips */}
+            <rect x="10" y="20" width="10" height="155" rx="1.5" fill="#0f172a" />
+            <rect x="100" y="20" width="10" height="155" rx="1.5" fill="#0f172a" />
+          </g>
+        );
+      }
+
+      case 'esp32_s3': {
+        return (
+          <g>
+            {/* Modern Matte Black PCB */}
+            <rect x="5" y="5" width="130" height="180" rx="6" fill="#111827" stroke="#1f2937" strokeWidth="2" />
+            {/* Serpentine PCB Antenna */}
+            <path d="M 40 8 H 90 V 22 H 40 V 16 H 84 V 14 H 40 Z" fill="#ca8a04" />
+            {/* Metal RF Shield */}
+            <rect x="25" y="32" width="80" height="75" rx="3" fill="#64748b" stroke="#94a3b8" strokeWidth="1.5" />
+            <text x="65" y="60" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle">ESP32-S3</text>
+            <text x="65" y="74" fill="#cbd5e1" fontSize="7.5" textAnchor="middle">Wi-Fi + BLE 5</text>
+            <text x="65" y="86" fill="#93c5fd" fontSize="7" textAnchor="middle">Dual Xtensa LX7</text>
+            {/* Dual USB-C Ports at bottom */}
+            <rect x="25" y="165" width="26" height="12" rx="2" fill="#cbd5e1" stroke="#475569" />
+            <text x="38" y="162" fill="#94a3b8" fontSize="5.5" textAnchor="middle">USB</text>
+            <rect x="79" y="165" width="26" height="12" rx="2" fill="#cbd5e1" stroke="#475569" />
+            <text x="92" y="162" fill="#94a3b8" fontSize="5.5" textAnchor="middle">UART</text>
+            {/* Header pin strips */}
+            <rect x="10" y="20" width="10" height="145" rx="1.5" fill="#0f172a" />
+            <rect x="120" y="20" width="10" height="145" rx="1.5" fill="#0f172a" />
+          </g>
+        );
+      }
+
+      case 'battery_18650': {
+        return (
+          <g>
+            {/* Cyan/Green 18650 Cell Body */}
+            <rect x="8" y="16" width="44" height="114" rx="10" fill="#06b6d4" stroke="#0891b2" strokeWidth="2" />
+            {/* Top Positive Terminal Nub */}
+            <rect x="20" y="8" width="20" height="9" rx="2" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1.5" />
+            {/* Flat Bottom Negative Base */}
+            <rect x="16" y="128" width="28" height="6" rx="1.5" fill="#cbd5e1" stroke="#94a3b8" strokeWidth="1.5" />
+            {/* Plastic Wrap Seam & Highlights */}
+            <line x1="16" y1="20" x2="16" y2="124" stroke="#ffffff" strokeWidth="2" opacity="0.3" />
+            <text x="30" y="60" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">18650</text>
+            <text x="30" y="74" fill="#e0f2fe" fontSize="8" fontWeight="bold" textAnchor="middle" fontFamily="monospace">3.7V</text>
+            <text x="30" y="87" fill="#a5f3fc" fontSize="6.5" textAnchor="middle" fontFamily="monospace">2600mAh</text>
+          </g>
+        );
+      }
+
       // Slide switch
       case 'toggle_switch': {
         const isOn = Boolean(component.properties.state);

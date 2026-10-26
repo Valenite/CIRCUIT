@@ -139,7 +139,8 @@ export function solveCircuit(
       comp.type === 'battery_9v' ||
       comp.type === 'battery_aa' ||
       comp.type === 'battery_coin' ||
-      comp.type === 'battery_dc'
+      comp.type === 'battery_dc' ||
+      comp.type === 'battery_18650'
     ) {
       const vPos = netIndices[find(`${comp.id}:positive`)];
       const vNeg = netIndices[find(`${comp.id}:negative`)];
@@ -148,6 +149,7 @@ export function solveCircuit(
         if (comp.type === 'battery_9v') voltage = 9;
         else if (comp.type === 'battery_aa') voltage = 1.5;
         else if (comp.type === 'battery_coin') voltage = 3;
+        else if (comp.type === 'battery_18650') voltage = 3.7;
         else voltage = 5;
       }
       if (vPos !== undefined && vNeg !== undefined && vPos !== vNeg) {
@@ -334,6 +336,19 @@ export function solveCircuit(
         const n1 = netIndices[find(`${comp.id}:terminal1`)];
         const n2 = netIndices[find(`${comp.id}:terminal2`)];
         addConductance(n1, n2, 1 / 25);
+        break;
+      }
+      case 'n20_motor': {
+        const n1 = netIndices[find(`${comp.id}:m_pos`)];
+        const n2 = netIndices[find(`${comp.id}:m_neg`)];
+        addConductance(n1, n2, 1 / 30);
+        break;
+      }
+      case 'vibration_motor':
+      case 'solenoid': {
+        const n1 = netIndices[find(`${comp.id}:pos`)];
+        const n2 = netIndices[find(`${comp.id}:neg`)];
+        addConductance(n1, n2, 1 / 35);
         break;
       }
       case 'servo_motor': {
@@ -543,6 +558,36 @@ export function solveCircuit(
           current,
           voltageDrop: vDrop,
           rpm,
+        };
+        break;
+      }
+      case 'n20_motor': {
+        const v1 = result.nodeVoltages[`${comp.id}:m_pos`] || 0;
+        const v2 = result.nodeVoltages[`${comp.id}:m_neg`] || 0;
+        const vDrop = Math.abs(v1 - v2);
+        const current = vDrop / 30;
+        const powered = vDrop >= 0.8;
+        const rpm = powered ? Math.round(Math.min(600, (vDrop / 6) * 300)) : 0;
+        result.componentOutputs[comp.id] = {
+          powered,
+          current,
+          voltageDrop: vDrop,
+          rpm,
+        };
+        break;
+      }
+      case 'emg_sensor': {
+        const vcc = result.nodeVoltages[`${comp.id}:vcc`] || 0;
+        const gnd = result.nodeVoltages[`${comp.id}:gnd`] || 0;
+        const powered = vcc - gnd >= 2.5;
+        const flexPercent = comp.properties.stimulusValue ?? 40;
+        const sigV = powered ? Number(((vcc - gnd) * (flexPercent / 100)).toFixed(2)) : 0;
+        result.nodeVoltages[`${comp.id}:sig`] = sigV;
+        result.componentOutputs[comp.id] = {
+          powered,
+          current: powered ? 0.008 : 0,
+          voltageDrop: vcc - gnd,
+          sensorReading: `${flexPercent}% Flex (${sigV}V)`,
         };
         break;
       }

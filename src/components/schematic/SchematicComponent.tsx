@@ -538,6 +538,27 @@ export const SchematicComponent: React.FC<Props> = ({
         );
       }
 
+      case 'emg_sensor': {
+        return (
+          <g>
+            <rect x="5" y="5" width="90" height="70" rx="4" fill="#090d16" stroke="#f43f5e" strokeWidth="2" />
+            <polygon points="25,25 25,55 55,40" fill="none" stroke="#f43f5e" strokeWidth="1.5" />
+            <text x="35" y="43" fill="#f43f5e" fontSize="8" fontWeight="bold">EMG</text>
+            <text x="50" y="66" fill="#fda4af" fontSize="7" fontWeight="bold" textAnchor="middle">MyoWare</text>
+          </g>
+        );
+      }
+
+      case 'n20_motor': {
+        return (
+          <g>
+            <circle cx="45" cy="35" r="22" fill="#090d16" stroke="#38bdf8" strokeWidth="2" />
+            <text x="45" y="40" fill="#38bdf8" fontSize="14" fontWeight="bold" textAnchor="middle">M</text>
+            <text x="45" y="52" fill="#94a3b8" fontSize="6.5" textAnchor="middle">N20</text>
+          </g>
+        );
+      }
+
       case 'custom_ai': {
         const sw = component.properties.customWidth || 120;
         const sh = component.properties.customHeight || 80;

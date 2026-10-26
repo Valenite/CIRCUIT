@@ -21,6 +21,7 @@ import { BomModal } from './components/BomModal';
 import { AiComponentModal } from './components/AiComponentModal';
 import { CodeEditorModal } from './components/CodeEditorModal';
 import { SensorStimulusPanel } from './components/SensorStimulusPanel';
+import { PropertyPanel } from './components/PropertyPanel';
 
 export function App() {
   const initial = useMemo(() => getStarterExample('led_simple'), []);
@@ -33,7 +34,12 @@ export function App() {
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>('res_1');
   const [selectedWireId, setSelectedWireId] = useState<string | null>(null);
 
-  // Lifted from Canvas – controlled by Navbar
+  // PropertyPanel state: tracks which component and where the panel should appear
+  const [propPanelId, setPropPanelId] = useState<string | null>(null);
+  const [propPanelPos, setPropPanelPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  // Lifted from Canvas — controlled by Navbar
   const [defaultRoutingMode, setDefaultRoutingMode] = useState<WireRoutingType>('orthogonal');
   const [gridSnap, setGridSnap] = useState<boolean>(true);
 
@@ -227,6 +233,7 @@ export function App() {
         )
       );
       setSelectedComponentId(null);
+      if (propPanelId === selectedComponentId) setPropPanelId(null);
     } else if (selectedWireId) {
       setWires((prev) => prev.filter((w) => w.id !== selectedWireId));
       setSelectedWireId(null);
@@ -240,6 +247,7 @@ export function App() {
       setWires([]);
       setSelectedComponentId(null);
       setSelectedWireId(null);
+      setPropPanelId(null);
     }
   };
 
@@ -250,6 +258,7 @@ export function App() {
     setWires(ex.wires);
     setSelectedComponentId(null);
     setSelectedWireId(null);
+    setPropPanelId(null);
     setSimRunning(true);
   };
 
@@ -290,6 +299,18 @@ export function App() {
     }
   };
 
+  // Track last mouse-down position on the main canvas area for PropertyPanel placement
+  const handleMainMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only track position when clicking a component (not wires/panning)
+    // Canvas forwards the actual component click to onSelectComponent which updates propPanelPos
+    setPropPanelPos({ x: e.clientX, y: e.clientY });
+  };
+
+  // Get the component currently shown in the property panel
+  const propPanelComponent = propPanelId
+    ? components.find((c) => c.id === propPanelId) ?? null
+    : null;
+
   return (
     <div className="flex flex-col w-screen h-screen overflow-hidden bg-[#070a12] text-slate-100">
       {/* Top Navbar */}
@@ -317,7 +338,7 @@ export function App() {
       {/* Toast Alert */}
       {toastMessage && (
         <div className="absolute top-18 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-gradient-to-r from-cyan-500/90 to-blue-600/90 border border-cyan-400 text-white text-xs font-bold rounded-xl shadow-[0_0_30px_rgba(6,182,212,0.4)] backdrop-blur animate-in fade-in duration-200">
-          ✨ {toastMessage}
+          ⚡ {toastMessage}
         </div>
       )}
 
@@ -332,7 +353,7 @@ export function App() {
           }}
         />
 
-        <main className="w-full h-full relative">
+        <main ref={mainRef} className="w-full h-full relative" onMouseDown={handleMainMouseDown}>
           <Canvas
             components={components}
             wires={wires}
@@ -342,11 +363,20 @@ export function App() {
             selectedWireId={selectedWireId}
             onSelectComponent={(id) => {
               setSelectedComponentId(id);
-              if (id) setSelectedWireId(null);
+              if (id) {
+                setSelectedWireId(null);
+                // Open property panel for this component
+                setPropPanelId(id);
+              } else {
+                setPropPanelId(null);
+              }
             }}
             onSelectWire={(id) => {
               setSelectedWireId(id);
-              if (id) setSelectedComponentId(null);
+              if (id) {
+                setSelectedComponentId(null);
+                setPropPanelId(null);
+              }
             }}
             onUpdateComponentPosition={handleUpdateComponentPosition}
             onUpdateComponentProperties={handleUpdateComponentProperties}
@@ -359,6 +389,18 @@ export function App() {
             defaultRoutingMode={defaultRoutingMode}
             gridSnap={gridSnap}
           />
+
+          {/* Floating Property Inspector Panel */}
+          {propPanelComponent && (
+            <PropertyPanel
+              component={propPanelComponent}
+              simResult={simResult}
+              canvasX={propPanelPos.x}
+              canvasY={propPanelPos.y}
+              onUpdateProperties={handleUpdateComponentProperties}
+              onClose={() => setPropPanelId(null)}
+            />
+          )}
 
           {/* Floating Sensor Interactive Test Bench (Only visible when simulation is running) */}
           <SensorStimulusPanel
