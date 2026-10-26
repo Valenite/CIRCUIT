@@ -38,6 +38,8 @@ export function App() {
   const [propPanelId, setPropPanelId] = useState<string | null>(null);
   const [propPanelPos, setPropPanelPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const mainRef = useRef<HTMLDivElement>(null);
+  // Track latest mouse position so we know where click was when selection fires
+  const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Lifted from Canvas — controlled by Navbar
   const [defaultRoutingMode, setDefaultRoutingMode] = useState<WireRoutingType>('orthogonal');
@@ -301,9 +303,7 @@ export function App() {
 
   // Track last mouse-down position on the main canvas area for PropertyPanel placement
   const handleMainMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only track position when clicking a component (not wires/panning)
-    // Canvas forwards the actual component click to onSelectComponent which updates propPanelPos
-    setPropPanelPos({ x: e.clientX, y: e.clientY });
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
   // Get the component currently shown in the property panel
@@ -367,6 +367,7 @@ export function App() {
                 setSelectedWireId(null);
                 // Open property panel for this component
                 setPropPanelId(id);
+                setPropPanelPos(lastMousePos.current);
               } else {
                 setPropPanelId(null);
               }
@@ -395,8 +396,8 @@ export function App() {
             <PropertyPanel
               component={propPanelComponent}
               simResult={simResult}
-              canvasX={propPanelPos.x}
-              canvasY={propPanelPos.y}
+              anchorX={propPanelPos.x}
+              anchorY={propPanelPos.y}
               onUpdateProperties={handleUpdateComponentProperties}
               onClose={() => setPropPanelId(null)}
             />

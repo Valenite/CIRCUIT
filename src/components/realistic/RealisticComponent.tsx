@@ -1118,6 +1118,117 @@ export const RealisticComponent: React.FC<Props> = ({
         );
       }
 
+      case 'flex_sensor': {
+        const stimulus = component.properties.stimulusValue ?? 0;
+        return (
+          <g>
+            {/* Long black flexible polyimide substrate strip */}
+            <rect x="6" y="5" width="18" height="150" rx="4" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+            {/* Carbon resistive ink segmented bars */}
+            {[20, 32, 44, 56, 68, 80, 92, 104, 116, 128].map((y) => (
+              <rect key={y} x="9" y={y} width="12" height="6" rx="1.5" fill="#475569" stroke="#64748b" strokeWidth="0.5" />
+            ))}
+            {/* Conductive silver trace lines running along edges */}
+            <line x1="8" y1="15" x2="8" y2="140" stroke="#94a3b8" strokeWidth="1.5" />
+            <line x1="22" y1="15" x2="22" y2="140" stroke="#94a3b8" strokeWidth="1.5" />
+            {/* Bend indicator */}
+            <text x="15" y="8" fill="#38bdf8" fontSize="5" fontWeight="bold" textAnchor="middle">FLEX</text>
+            <text x="15" y="148" fill="#f59e0b" fontSize="5" textAnchor="middle">{Math.round(stimulus)}°</text>
+          </g>
+        );
+      }
+
+      case 'force_sensor': {
+        return (
+          <g>
+            {/* Circular active sensing head */}
+            <circle cx="30" cy="35" r="25" fill="#1e293b" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="30" cy="35" r="18" fill="#0f172a" stroke="#64748b" strokeWidth="1.5" strokeDasharray="3 3" />
+            <circle cx="30" cy="35" r="10" fill="#334155" />
+            <text x="30" y="38" fill="#e2e8f0" fontSize="7" fontWeight="bold" textAnchor="middle">FSR</text>
+            {/* Flexible neck tail */}
+            <rect x="22" y="60" width="16" height="70" rx="2" fill="#0f172a" stroke="#475569" strokeWidth="1" />
+            <line x1="26" y1="60" x2="26" y2="128" stroke="#94a3b8" strokeWidth="1.5" />
+            <line x1="34" y1="60" x2="34" y2="128" stroke="#94a3b8" strokeWidth="1.5" />
+          </g>
+        );
+      }
+
+      case 'heart_rate_max30102': {
+        const isPowered = output.powered;
+        return (
+          <g>
+            {/* Dark green / purple PCB */}
+            <rect x="5" y="5" width="55" height="55" rx="6" fill="#1e1b4b" stroke="#4338ca" strokeWidth="1.5" />
+            {/* Optical sensor window with RED & IR LEDs */}
+            <rect x="18" y="18" width="28" height="28" rx="3" fill="#020617" stroke="#6366f1" strokeWidth="1" />
+            <circle cx="26" cy="32" r="4" fill={isPowered ? '#ef4444' : '#7f1d1d'} filter={isPowered ? 'drop-shadow(0 0 6px #ef4444)' : 'none'} />
+            <circle cx="38" cy="32" r="4" fill={isPowered ? '#a855f7' : '#581c87'} filter={isPowered ? 'drop-shadow(0 0 6px #a855f7)' : 'none'} />
+            <text x="32" y="14" fill="#a5b4fc" fontSize="6.5" fontWeight="bold" textAnchor="middle">MAX30102</text>
+          </g>
+        );
+      }
+
+      case 'stm32_bluepill': {
+        return (
+          <g>
+            {/* Signature Royal Blue PCB */}
+            <rect x="5" y="5" width="130" height="50" rx="4" fill="#1d4ed8" stroke="#1e40af" strokeWidth="2" />
+            {/* Micro-USB Port */}
+            <rect x="2" y="18" width="16" height="14" rx="2" fill="#cbd5e1" stroke="#475569" />
+            {/* STM32F103 MCU chip */}
+            <rect x="50" y="14" width="24" height="24" rx="2" fill="#0f172a" stroke="#1e293b" strokeWidth="1.5" />
+            <text x="62" y="27" fill="#ffffff" fontSize="5" fontWeight="bold" textAnchor="middle">STM32</text>
+            {/* Reset button */}
+            <circle cx="28" cy="25" r="4" fill="#ef4444" />
+            {/* 8MHz crystal can */}
+            <rect x="85" y="20" width="18" height="10" rx="3" fill="#e2e8f0" stroke="#94a3b8" />
+            <text x="94" y="27" fill="#1e293b" fontSize="4.5" textAnchor="middle">8MHz</text>
+            <text x="115" y="14" fill="#bfdbfe" fontSize="6" fontWeight="bold">BluePill</text>
+          </g>
+        );
+      }
+
+      case 'attiny85': {
+        return (
+          <g>
+            {/* DIP-8 IC Body */}
+            <rect x="12" y="8" width="36" height="54" rx="3" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+            {/* Pin 1 orientation notch */}
+            <path d="M 26 8 A 4 4 0 0 0 34 8" fill="#1e293b" stroke="#334155" />
+            <circle cx="18" cy="16" r="2" fill="#475569" />
+            {/* IC label */}
+            <text x="30" y="34" fill="#e2e8f0" fontSize="6.5" fontWeight="bold" textAnchor="middle" fontFamily="monospace">ATTINY</text>
+            <text x="30" y="44" fill="#38bdf8" fontSize="6" textAnchor="middle" fontFamily="monospace">85-20PU</text>
+            {/* 8 Silver Lead Legs */}
+            {[15, 30, 45, 60].map((y) => (
+              <React.Fragment key={y}>
+                <rect x="4" y={y - 3} width="8" height="6" rx="1" fill="#cbd5e1" stroke="#64748b" strokeWidth="0.5" />
+                <rect x="48" y={y - 3} width="8" height="6" rx="1" fill="#cbd5e1" stroke="#64748b" strokeWidth="0.5" />
+              </React.Fragment>
+            ))}
+          </g>
+        );
+      }
+
+      case 'esp32_cam': {
+        return (
+          <g>
+            {/* Black PCB */}
+            <rect x="5" y="5" width="80" height="100" rx="5" fill="#090d16" stroke="#1e293b" strokeWidth="2" />
+            {/* Gold OV2640 Camera Lens Module */}
+            <circle cx="45" cy="40" r="18" fill="#020617" stroke="#d97706" strokeWidth="2" />
+            <circle cx="45" cy="40" r="10" fill="#0f172a" stroke="#2563eb" strokeWidth="1.5" />
+            <circle cx="45" cy="40" r="5" fill="#000000" />
+            {/* Bright High-Power Flash LED */}
+            <rect x="38" y="68" width="14" height="14" rx="2" fill="#fef08a" stroke="#ca8a04" strokeWidth="1.5" />
+            {/* MicroSD card slot on back */}
+            <rect x="25" y="88" width="40" height="10" rx="1" fill="#475569" stroke="#64748b" strokeWidth="1" />
+            <text x="45" y="16" fill="#f8fafc" fontSize="7" fontWeight="bold" textAnchor="middle">ESP32-CAM</text>
+          </g>
+        );
+      }
+
       default:
         return (
           <rect x="5" y="5" width="60" height="40" rx="6" fill="#1e293b" stroke="#06b6d4" strokeWidth="1.5" />

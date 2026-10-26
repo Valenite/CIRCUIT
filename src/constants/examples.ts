@@ -25,7 +25,7 @@ export function getStarterExample(key: string): {
         x: 260,
         y: 80,
         rotation: 0,
-        properties: { state: false },
+        properties: { state: true },
         pins: COMPONENT_TEMPLATES.push_button.pins,
       };
 
@@ -191,7 +191,7 @@ export function getStarterExample(key: string): {
         x: 230,
         y: 60,
         rotation: 0,
-        properties: { state: false },
+        properties: { state: true },
         pins: COMPONENT_TEMPLATES.push_button.pins,
       };
 
@@ -351,7 +351,7 @@ export function getStarterExample(key: string): {
         x: 270,
         y: 140,
         rotation: 0,
-        properties: { state: false },
+        properties: { state: true },
         pins: COMPONENT_TEMPLATES.toggle_switch.pins,
       };
 
