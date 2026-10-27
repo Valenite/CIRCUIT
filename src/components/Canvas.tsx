@@ -479,233 +479,7 @@ export const Canvas: React.FC<Props> = ({
         <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
           <rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid-dots)" />
 
-          {/* ================= WIRES ================= */}
-          {wires.map((wire) => {
-            const fromComp = components.find((c) => c.id === wire.fromComponentId);
-            const toComp = components.find((c) => c.id === wire.toComponentId);
-            if (!fromComp || !toComp) return null;
-
-            const fromPin = fromComp.pins.find((p) => p.id === wire.fromPinId);
-            const toPin = toComp.pins.find((p) => p.id === wire.toPinId);
-            if (!fromPin || !toPin) return null;
-
-            const posA = getPinPos(fromComp, fromPin);
-            const posB = getPinPos(toComp, toPin);
-
-            const isSelected = selectedWireId === wire.id;
-            const isHovered = hoveredWireId === wire.id;
-            const routingMode = wire.routingType || defaultRoutingMode;
-            // Always use instant live waypoints if this wire is currently being dragged
-            const waypoints =
-              draggedWaypoint && draggedWaypoint.wireId === wire.id
-                ? draggedWaypoint.liveWaypoints
-                : wire.waypoints || [];
-
-            // Generate straight orthogonal 90° or curved path
-            const pathData = generateWirePath(posA, posB, waypoints, routingMode);
-
-            const currentFlow = simResult.branchCurrents[wire.id] || 0;
-            const isEnergized = simResult.isRunning && Math.abs(currentFlow) > 0.0001;
-            const isReverse = currentFlow < 0;
-
-            const midX = Math.round((posA.x + posB.x) / 2);
-            const midY = Math.round((posA.y + posB.y) / 2);
-
-            return (
-              <g
-                key={wire.id}
-                onMouseEnter={() => setHoveredWireId(wire.id)}
-                onMouseLeave={() => setHoveredWireId(null)}
-                onClick={(e) => handleWireClick(e, wire)}
-                className="cursor-pointer"
-              >
-                {/* Thick invisible click/drag selection buffer */}
-                <path
-                  d={pathData}
-                  stroke="transparent"
-                  strokeWidth="28"
-                  fill="none"
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    onSelectWire(wire.id);
-                    onSelectComponent(null);
-
-                    // Click & drag ANY wire at ANY point to immediately bend it!
-                    const coords = getCanvasCoords(e);
-                    const snap = gridSnap ? 10 : 1;
-                    const snappedX = Math.round(coords.x / snap) * snap;
-                    const snappedY = Math.round(coords.y / snap) * snap;
-
-                    const existing = wire.waypoints ? [...wire.waypoints] : [];
-
-                    // 1. If clicked near an existing waypoint, drag that existing waypoint
-                    const closeIdx = getClosestExistingWaypointIndex(existing, coords, 18);
-                    if (closeIdx !== -1) {
-                      setDraggedWaypoint({
-                        wireId: wire.id,
-                        index: closeIdx,
-                        liveWaypoints: existing,
-                        isNew: false,
-                      });
-                      return;
-                    }
-
-                    // 2. Clicked anywhere along the wire: insert at exact segment and drag from that point!
-                    const insertIdx = findBestWaypointInsertIndex(posA, posB, existing, coords);
-                    const nextWaypoints = [...existing];
-                    nextWaypoints.splice(insertIdx, 0, { x: snappedX, y: snappedY });
-
-                    setDraggedWaypoint({
-                      wireId: wire.id,
-                      index: insertIdx,
-                      liveWaypoints: nextWaypoints,
-                      isNew: true,
-                      startPos: { x: coords.x, y: coords.y },
-                    });
-                    onUpdateWireWaypoints(wire.id, nextWaypoints);
-                  }}
-                  className="cursor-grab active:cursor-grabbing"
-                />
-
-                {/* Outer Glow / Halo */}
-                <path
-                  d={pathData}
-                  stroke={isSelected ? '#00f0ff' : isEnergized ? '#fef08a' : isHovered ? '#38bdf8' : '#070b14'}
-                  strokeWidth={isSelected ? '7' : isEnergized ? '5' : isHovered ? '5' : '4'}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                  opacity={isSelected ? 0.95 : isEnergized ? 0.4 : isHovered ? 0.4 : 0.8}
-                />
-
-                {/* Main Solid Wire Core */}
-                <path
-                  d={pathData}
-                  stroke={wire.color || '#3b82f6'}
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  fill="none"
-                />
-
-                {/* Animated Electron Current Flow */}
-                {isEnergized && (
-                  <path
-                    d={pathData}
-                    stroke="#ffffff"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    fill="none"
-                    className={isReverse ? 'wire-animated-reverse' : 'wire-animated'}
-                    opacity="0.95"
-                  />
-                )}
-
-                {/* ── Terminal endpoint dots — always visible so users can see exactly where wires land ── */}
-                <circle
-                  cx={posA.x}
-                  cy={posA.y}
-                  r="4.5"
-                  fill={wire.color || '#3b82f6'}
-                  stroke="#070b14"
-                  strokeWidth="1.5"
-                  opacity="0.92"
-                  style={{ pointerEvents: 'none' }}
-                />
-                <circle
-                  cx={posB.x}
-                  cy={posB.y}
-                  r="4.5"
-                  fill={wire.color || '#3b82f6'}
-                  stroke="#070b14"
-                  strokeWidth="1.5"
-                  opacity="0.92"
-                  style={{ pointerEvents: 'none' }}
-                />
-
-                {/* ================= DRAGGABLE WAYPOINT BEND HANDLES ================= */}
-                {(isSelected || isHovered) && (
-                  <g>
-                    {/* Existing user draggable waypoints */}
-                    {waypoints.map((wp, idx) => (
-                      <g
-                        key={idx}
-                        transform={`translate(${wp.x}, ${wp.y})`}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          setDraggedWaypoint({
-                            wireId: wire.id,
-                            index: idx,
-                            liveWaypoints: waypoints,
-                            isNew: false,
-                          });
-                        }}
-                        onDoubleClick={(e) => handleRemoveWaypoint(e, wire.id, idx)}
-                        className="cursor-move"
-                      >
-                        <circle cx="0" cy="0" r="10" fill="transparent" />
-                        <circle
-                          cx="0"
-                          cy="0"
-                          r="5.5"
-                          fill="#00f0ff"
-                          stroke="#ffffff"
-                          strokeWidth="2"
-                          filter="drop-shadow(0 0 5px #00f0ff)"
-                        />
-                      </g>
-                    ))}
-
-                    {/* Virtual Midpoint Add Bend handle for ANY wire (curved or orthogonal) */}
-                    {waypoints.length === 0 && (
-                      <g
-                        transform={`translate(${midX}, ${midY})`}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          handleAddMidpointBend(wire, midX, midY);
-                        }}
-                        className="cursor-pointer group"
-                      >
-                        <title>Drag to bend this wire (Curved arc or 90° corner)</title>
-                        <circle cx="0" cy="0" r="14" fill="transparent" />
-                        <circle
-                          cx="0"
-                          cy="0"
-                          r="6.5"
-                          fill="#00f0ff"
-                          stroke="#ffffff"
-                          strokeWidth="2"
-                          filter="drop-shadow(0 0 6px #00f0ff)"
-                          className="transition-transform group-hover:scale-125"
-                        />
-                        <circle cx="0" cy="0" r="2" fill="#070b14" />
-                      </g>
-                    )}
-                  </g>
-                )}
-              </g>
-            );
-          })}
-
-          {/* Wiring Preview */}
-          {wiringStart && wiringCurrent && (
-            <g>
-              <line
-                x1={wiringStart.startX}
-                y1={wiringStart.startY}
-                x2={wiringCurrent.x}
-                y2={wiringCurrent.y}
-                stroke="#00f0ff"
-                strokeWidth="3"
-                strokeDasharray="4 4"
-                strokeLinecap="round"
-              />
-              <circle cx={wiringCurrent.x} cy={wiringCurrent.y} r="6" fill="#00f0ff" />
-            </g>
-          )}
-
-          {/* ================= COMPONENTS ================= */}
+          {/* ================= COMPONENTS (Rendered First: Canvas Floor) ================= */}
           {components.map((comp) => {
             const template = COMPONENT_TEMPLATES[comp.type];
             const isSelected = selectedComponentId === comp.id;
@@ -727,7 +501,6 @@ export const Canvas: React.FC<Props> = ({
                     x: coords.x - comp.x,
                     y: coords.y - comp.y,
                   });
-
                 }}
                 className="cursor-move"
               >
@@ -896,6 +669,248 @@ export const Canvas: React.FC<Props> = ({
               </g>
             );
           })}
+
+          {/* ================= WIRES (Rendered ON TOP of Components for Perfect Cirkit-Style Visibility) ================= */}
+          {wires.map((wire) => {
+            const fromComp = components.find((c) => c.id === wire.fromComponentId);
+            const toComp = components.find((c) => c.id === wire.toComponentId);
+            if (!fromComp || !toComp) return null;
+
+            const fromPin = fromComp.pins.find((p) => p.id === wire.fromPinId);
+            const toPin = toComp.pins.find((p) => p.id === wire.toPinId);
+            if (!fromPin || !toPin) return null;
+
+            const posA = getPinPos(fromComp, fromPin);
+            const posB = getPinPos(toComp, toPin);
+
+            const isSelected = selectedWireId === wire.id;
+            const isHovered = hoveredWireId === wire.id;
+            const routingMode = wire.routingType || defaultRoutingMode;
+            // Always use instant live waypoints if this wire is currently being dragged
+            const waypoints =
+              draggedWaypoint && draggedWaypoint.wireId === wire.id
+                ? draggedWaypoint.liveWaypoints
+                : wire.waypoints || [];
+
+            // Generate straight orthogonal 90° or curved path
+            const pathData = generateWirePath(posA, posB, waypoints, routingMode);
+
+            const currentFlow = simResult.branchCurrents[wire.id] || 0;
+            const isEnergized = simResult.isRunning && Math.abs(currentFlow) > 0.0001;
+            const isReverse = currentFlow < 0;
+
+            const midX = Math.round((posA.x + posB.x) / 2);
+            const midY = Math.round((posA.y + posB.y) / 2);
+
+            return (
+              <g
+                key={wire.id}
+                onMouseEnter={() => setHoveredWireId(wire.id)}
+                onMouseLeave={() => setHoveredWireId(null)}
+                onClick={(e) => handleWireClick(e, wire)}
+                className="cursor-pointer"
+                style={{ pointerEvents: wiringStart ? 'none' : 'auto' }}
+              >
+                {/* Invisible click/drag selection buffer — 12px wide for clean selection without masking pins */}
+                <path
+                  d={pathData}
+                  stroke="transparent"
+                  strokeWidth="12"
+                  fill="none"
+                  onMouseDown={(e) => {
+                    const coords = getCanvasCoords(e);
+                    // If clicked near posA or posB (within 10px), allow pin click to pass through
+                    const distA = Math.hypot(coords.x - posA.x, coords.y - posA.y);
+                    const distB = Math.hypot(coords.x - posB.x, coords.y - posB.y);
+                    if (distA <= 10 || distB <= 10) {
+                      return;
+                    }
+
+                    e.stopPropagation();
+                    onSelectWire(wire.id);
+                    onSelectComponent(null);
+
+                    // Click & drag ANY wire at ANY point to immediately bend it!
+                    const snap = gridSnap ? 10 : 1;
+                    const snappedX = Math.round(coords.x / snap) * snap;
+                    const snappedY = Math.round(coords.y / snap) * snap;
+
+                    const existing = wire.waypoints ? [...wire.waypoints] : [];
+
+                    // 1. If clicked near an existing waypoint, drag that existing waypoint
+                    const closeIdx = getClosestExistingWaypointIndex(existing, coords, 18);
+                    if (closeIdx !== -1) {
+                      setDraggedWaypoint({
+                        wireId: wire.id,
+                        index: closeIdx,
+                        liveWaypoints: existing,
+                        isNew: false,
+                      });
+                      return;
+                    }
+
+                    // 2. Clicked anywhere along the wire: insert at exact segment and drag from that point!
+                    const insertIdx = findBestWaypointInsertIndex(posA, posB, existing, coords);
+                    const nextWaypoints = [...existing];
+                    nextWaypoints.splice(insertIdx, 0, { x: snappedX, y: snappedY });
+
+                    setDraggedWaypoint({
+                      wireId: wire.id,
+                      index: insertIdx,
+                      liveWaypoints: nextWaypoints,
+                      isNew: true,
+                      startPos: { x: coords.x, y: coords.y },
+                    });
+                    onUpdateWireWaypoints(wire.id, nextWaypoints);
+                  }}
+                  className="cursor-grab active:cursor-grabbing"
+                />
+
+                {/* Outer Glow / Dark Contour for Cirkit-Style Clear Contrast */}
+                <path
+                  d={pathData}
+                  stroke={isSelected ? '#00f0ff' : isEnergized ? '#fef08a' : isHovered ? '#38bdf8' : '#070b14'}
+                  strokeWidth={isSelected ? '7' : isEnergized ? '5' : isHovered ? '5' : '4.6'}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                  opacity={isSelected ? 0.95 : isEnergized ? 0.45 : isHovered ? 0.45 : 0.85}
+                  style={{ pointerEvents: 'none' }}
+                />
+
+                {/* Main Solid Wire Core */}
+                <path
+                  d={pathData}
+                  stroke={wire.color || '#3b82f6'}
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                  style={{ pointerEvents: 'none' }}
+                />
+
+                {/* Animated Electron Current Flow */}
+                {isEnergized && (
+                  <path
+                    d={pathData}
+                    stroke="#ffffff"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                    className={isReverse ? 'wire-animated-reverse' : 'wire-animated'}
+                    opacity="0.95"
+                    style={{ pointerEvents: 'none' }}
+                  />
+                )}
+
+                {/* ── Cirkit-style Terminal Connection Dots at Both Ends ── */}
+                <g style={{ pointerEvents: 'none' }}>
+                  {/* Pin A Terminal */}
+                  <circle
+                    cx={posA.x}
+                    cy={posA.y}
+                    r="4.8"
+                    fill={wire.color || '#3b82f6'}
+                    stroke="#070b14"
+                    strokeWidth="1.5"
+                    opacity="0.96"
+                  />
+                  <circle cx={posA.x} cy={posA.y} r="1.6" fill="#070b14" opacity="0.9" />
+
+                  {/* Pin B Terminal */}
+                  <circle
+                    cx={posB.x}
+                    cy={posB.y}
+                    r="4.8"
+                    fill={wire.color || '#3b82f6'}
+                    stroke="#070b14"
+                    strokeWidth="1.5"
+                    opacity="0.96"
+                  />
+                  <circle cx={posB.x} cy={posB.y} r="1.6" fill="#070b14" opacity="0.9" />
+                </g>
+
+                {/* ================= DRAGGABLE WAYPOINT BEND HANDLES ================= */}
+                {(isSelected || isHovered) && (
+                  <g>
+                    {/* Existing user draggable waypoints */}
+                    {waypoints.map((wp, idx) => (
+                      <g
+                        key={idx}
+                        transform={`translate(${wp.x}, ${wp.y})`}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setDraggedWaypoint({
+                            wireId: wire.id,
+                            index: idx,
+                            liveWaypoints: waypoints,
+                            isNew: false,
+                          });
+                        }}
+                        onDoubleClick={(e) => handleRemoveWaypoint(e, wire.id, idx)}
+                        className="cursor-move"
+                      >
+                        <circle cx="0" cy="0" r="10" fill="transparent" />
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="5.5"
+                          fill="#00f0ff"
+                          stroke="#ffffff"
+                          strokeWidth="2"
+                          filter="drop-shadow(0 0 5px #00f0ff)"
+                        />
+                      </g>
+                    ))}
+
+                    {/* Virtual Midpoint Add Bend handle for ANY wire (curved or orthogonal) */}
+                    {waypoints.length === 0 && (
+                      <g
+                        transform={`translate(${midX}, ${midY})`}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          handleAddMidpointBend(wire, midX, midY);
+                        }}
+                        className="cursor-pointer group"
+                      >
+                        <title>Drag to bend this wire (Curved arc or 90° corner)</title>
+                        <circle cx="0" cy="0" r="14" fill="transparent" />
+                        <circle
+                          cx="0"
+                          cy="0"
+                          r="6.5"
+                          fill="#00f0ff"
+                          stroke="#ffffff"
+                          strokeWidth="2"
+                          filter="drop-shadow(0 0 6px #00f0ff)"
+                          className="transition-transform group-hover:scale-125"
+                        />
+                        <circle cx="0" cy="0" r="2" fill="#070b14" />
+                      </g>
+                    )}
+                  </g>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Wiring Preview */}
+          {wiringStart && wiringCurrent && (
+            <g>
+              <line
+                x1={wiringStart.startX}
+                y1={wiringStart.startY}
+                x2={wiringCurrent.x}
+                y2={wiringCurrent.y}
+                stroke="#00f0ff"
+                strokeWidth="3"
+                strokeDasharray="4 4"
+                strokeLinecap="round"
+              />
+              <circle cx={wiringCurrent.x} cy={wiringCurrent.y} r="6" fill="#00f0ff" />
+            </g>
+          )}
 
           {/* HOVER PIN INSPECTION TOOLTIP */}
           {hoveredPin && (
