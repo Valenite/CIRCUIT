@@ -392,6 +392,7 @@ export function App() {
               component={propPanelComponent}
               simResult={simResult}
               onUpdateProperties={handleUpdateComponentProperties}
+              onRotate={handleRotateComponent}
               onClose={() => setPropPanelId(null)}
             />
           )}

@@ -87,8 +87,10 @@ export const SchematicComponent: React.FC<Props> = ({
       case 'battery_9v':
       case 'battery_aa':
       case 'battery_coin':
-      case 'battery_dc': {
-        const v = component.properties.voltage || (component.type === 'battery_9v' ? 9 : component.type === 'battery_aa' ? 1.5 : 5);
+      case 'battery_dc':
+      case 'battery_18650':
+      case 'battery_lipo_3v7': {
+        const v = component.properties.voltage || (component.type === 'battery_9v' ? 9 : component.type === 'battery_aa' ? 1.5 : (component.type === 'battery_18650' || component.type === 'battery_lipo_3v7') ? 3.7 : 5);
         return (
           <g>
             <line x1="30" y1="10" x2="30" y2="30" stroke="#f8fafc" strokeWidth="2" />

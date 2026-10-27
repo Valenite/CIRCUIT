@@ -1,12 +1,13 @@
 import React from 'react';
 import type { CircuitComponent, SimulationResult } from '../types/circuit';
 import { COMPONENT_TEMPLATES } from '../constants/components';
-import { X, Zap, Cpu, ToggleLeft, ToggleRight, Sliders } from 'lucide-react';
+import { X, Zap, Cpu, ToggleLeft, ToggleRight, Sliders, RotateCw } from 'lucide-react';
 
 interface Props {
   component: CircuitComponent;
   simResult: SimulationResult;
   onUpdateProperties: (id: string, props: Record<string, any>) => void;
+  onRotate?: (id: string) => void;
   onClose: () => void;
 }
 
@@ -66,6 +67,7 @@ export const PropertyPanel: React.FC<Props> = ({
   component,
   simResult,
   onUpdateProperties,
+  onRotate,
   onClose,
 }) => {
   const template = COMPONENT_TEMPLATES[component.type];
@@ -92,14 +94,27 @@ export const PropertyPanel: React.FC<Props> = ({
               <div className="text-[9px] text-slate-500 font-mono truncate">{component.type}</div>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            onMouseDown={(e) => e.stopPropagation()}
-            className="ml-2 p-1 text-slate-400 hover:text-white hover:bg-slate-700/60 rounded-lg transition-all shrink-0 cursor-pointer"
-            title="Close Panel"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+            {onRotate && (
+              <button
+                onClick={() => onRotate(component.id)}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="px-2 py-1 text-cyan-400 hover:text-white hover:bg-cyan-500/20 border border-cyan-500/30 rounded-lg transition-all flex items-center gap-1 text-[11px] font-bold cursor-pointer"
+                title="Rotate 90° Clockwise (or press R)"
+              >
+                <RotateCw className="w-3 h-3" />
+                <span>{(component.rotation || 0)}°</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="p-1 text-slate-400 hover:text-white hover:bg-slate-700/60 rounded-lg transition-all cursor-pointer"
+              title="Close Panel"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Live Sim Status */}

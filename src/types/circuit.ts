@@ -5,6 +5,7 @@ export type ComponentType =
   | 'battery_coin'
   | 'battery_dc'
   | 'battery_18650'
+  | 'battery_lipo_3v7'
   | 'tp4056_charger'
   | 'lm2596_buck'
   | 'ground'

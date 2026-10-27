@@ -197,7 +197,9 @@ export function solveCircuit(
         comp.type === 'battery_9v' ||
         comp.type === 'battery_aa' ||
         comp.type === 'battery_coin' ||
-        comp.type === 'battery_dc'
+        comp.type === 'battery_dc' ||
+        comp.type === 'battery_18650' ||
+        comp.type === 'battery_lipo_3v7'
       ) {
         const negPin = `${comp.id}:negative`;
         if (allPinKeys.includes(negPin)) {
@@ -221,7 +223,8 @@ export function solveCircuit(
       comp.type === 'battery_aa' ||
       comp.type === 'battery_coin' ||
       comp.type === 'battery_dc' ||
-      comp.type === 'battery_18650'
+      comp.type === 'battery_18650' ||
+      comp.type === 'battery_lipo_3v7'
     ) {
       const vPos = netIndices[find(`${comp.id}:positive`)];
       const vNeg = netIndices[find(`${comp.id}:negative`)];
@@ -230,7 +233,7 @@ export function solveCircuit(
         if (comp.type === 'battery_9v') voltage = 9;
         else if (comp.type === 'battery_aa') voltage = 1.5;
         else if (comp.type === 'battery_coin') voltage = 3;
-        else if (comp.type === 'battery_18650') voltage = 3.7;
+        else if (comp.type === 'battery_18650' || comp.type === 'battery_lipo_3v7') voltage = 3.7;
         else voltage = 5;
       }
       if (vPos !== undefined && vNeg !== undefined && vPos !== vNeg) {

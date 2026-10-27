@@ -1310,6 +1310,22 @@ export const COMPONENT_TEMPLATES: Record<string, ComponentTemplate> = {
     ],
   },
 
+  battery_lipo_3v7: {
+    type: 'battery_lipo_3v7',
+    title: '3.7V LiPo Battery Pouch',
+    category: 'Power',
+    description: 'Rechargeable 3.7V 1200mAh Lithium Polymer pouch battery with protection PCB & JST connector',
+    defaultProperties: { voltage: 3.7 },
+    width: 90,
+    height: 140,
+    schematicWidth: 60,
+    schematicHeight: 80,
+    pins: [
+      { id: 'positive', name: '+ (Red +3.7V)', relX: 32, relY: 10, schematicRelX: 30, schematicRelY: 10, isPositive: true },
+      { id: 'negative', name: '- (Black GND)', relX: 58, relY: 10, schematicRelX: 30, schematicRelY: 70, isNegative: true },
+    ],
+  },
+
   tp4056_charger: {
     type: 'tp4056_charger',
     title: 'TP4056 Li-Ion Charger Module',
