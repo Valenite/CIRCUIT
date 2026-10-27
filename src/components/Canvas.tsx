@@ -797,6 +797,11 @@ export const Canvas: React.FC<Props> = ({
                     textAnchor = 'start';
                   }
 
+                  const isBreadboard = comp.type === 'breadboard_half' || comp.type === 'breadboard_mini';
+                  const snapRadius = isBreadboard
+                    ? isHovered || isWiringSource ? 5.5 : 2.5
+                    : isHovered || isWiringSource ? 7.5 : 4.5;
+
                   return (
                     <g
                       key={pin.id}
@@ -814,13 +819,13 @@ export const Canvas: React.FC<Props> = ({
                       onMouseLeave={() => setHoveredPin(null)}
                       className="cursor-pointer"
                     >
-                      <circle cx="0" cy="0" r="14" fill="transparent" />
+                      <circle cx="0" cy="0" r={isBreadboard ? 7 : 14} fill="transparent" />
 
                       {/* Snap Indicator Ring */}
                       <circle
                         cx="0"
                         cy="0"
-                        r={isHovered || isWiringSource ? '7.5' : '4.5'}
+                        r={snapRadius}
                         fill={
                           isWiringSource
                             ? '#00f0ff'
@@ -831,12 +836,12 @@ export const Canvas: React.FC<Props> = ({
                             : '#64748b'
                         }
                         stroke={isHovered || isWiringSource ? '#ffffff' : '#e2e8f0'}
-                        strokeWidth={isHovered || isWiringSource ? '3' : '1.5'}
+                        strokeWidth={isHovered || isWiringSource ? (isBreadboard ? 2 : 3) : (isBreadboard ? 1 : 1.5)}
                         className="transition-all"
                       />
 
                       {/* CLEAR PIN LABELS: Visible on all components with dark pill backdrop */}
-                      {showPinLabels && !hasBuiltinSilkscreen && (
+                      {showPinLabels && !hasBuiltinSilkscreen && !isBreadboard && (
                         <g transform={`translate(${labelOffsetX}, ${labelOffsetY})`} className="pointer-events-none select-none">
                           <rect
                             x={textAnchor === 'middle' ? -9 : textAnchor === 'end' ? -18 : 0}

@@ -34,12 +34,9 @@ export function App() {
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>('res_1');
   const [selectedWireId, setSelectedWireId] = useState<string | null>(null);
 
-  // PropertyPanel state: tracks which component and where the panel should appear
+  // PropertyPanel state: tracks which component is open
   const [propPanelId, setPropPanelId] = useState<string | null>(null);
-  const [propPanelPos, setPropPanelPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const mainRef = useRef<HTMLDivElement>(null);
-  // Track latest mouse position so we know where click was when selection fires
-  const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Lifted from Canvas — controlled by Navbar
   const [defaultRoutingMode, setDefaultRoutingMode] = useState<WireRoutingType>('orthogonal');
@@ -301,9 +298,9 @@ export function App() {
     }
   };
 
-  // Track last mouse-down position on the main canvas area for PropertyPanel placement
-  const handleMainMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    lastMousePos.current = { x: e.clientX, y: e.clientY };
+  // Track last mouse-down position on the main canvas area
+  const handleMainMouseDown = () => {
+    // Keep for event capture if needed
   };
 
   // Get the component currently shown in the property panel
@@ -365,9 +362,7 @@ export function App() {
               setSelectedComponentId(id);
               if (id) {
                 setSelectedWireId(null);
-                // Open property panel for this component
                 setPropPanelId(id);
-                setPropPanelPos(lastMousePos.current);
               } else {
                 setPropPanelId(null);
               }
@@ -391,13 +386,11 @@ export function App() {
             gridSnap={gridSnap}
           />
 
-          {/* Floating Property Inspector Panel */}
+          {/* Floating Property Inspector Panel (Anchored to Right Side) */}
           {propPanelComponent && (
             <PropertyPanel
               component={propPanelComponent}
               simResult={simResult}
-              anchorX={propPanelPos.x}
-              anchorY={propPanelPos.y}
               onUpdateProperties={handleUpdateComponentProperties}
               onClose={() => setPropPanelId(null)}
             />

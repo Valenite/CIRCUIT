@@ -664,18 +664,42 @@ export const COMPONENT_TEMPLATES: Record<string, ComponentTemplate> = {
     height: 240,
     schematicWidth: 120,
     schematicHeight: 120,
-    pins: [
-      { id: 'bb_vcc', name: 'Power Rail (+)', relX: 30, relY: 22, schematicRelX: 20, schematicRelY: 20, isPositive: true },
-      { id: 'bb_gnd', name: 'GND Rail (-)', relX: 150, relY: 22, schematicRelX: 100, schematicRelY: 20, isNegative: true },
-      { id: 'bb_row1_a', name: 'Row 1 Left (A-E)', relX: 45, relY: 65, schematicRelX: 20, schematicRelY: 45 },
-      { id: 'bb_row1_b', name: 'Row 1 Right (F-J)', relX: 135, relY: 65, schematicRelX: 100, schematicRelY: 45 },
-      { id: 'bb_row2_a', name: 'Row 2 Left (A-E)', relX: 45, relY: 105, schematicRelX: 20, schematicRelY: 70 },
-      { id: 'bb_row2_b', name: 'Row 2 Right (F-J)', relX: 135, relY: 105, schematicRelX: 100, schematicRelY: 70 },
-      { id: 'bb_row3_a', name: 'Row 3 Left (A-E)', relX: 45, relY: 145, schematicRelX: 20, schematicRelY: 95 },
-      { id: 'bb_row3_b', name: 'Row 3 Right (F-J)', relX: 135, relY: 145, schematicRelX: 100, schematicRelY: 95 },
-      { id: 'bb_row4_a', name: 'Row 4 Left (A-E)', relX: 45, relY: 185, schematicRelX: 20, schematicRelY: 110 },
-      { id: 'bb_row4_b', name: 'Row 4 Right (F-J)', relX: 135, relY: 185, schematicRelX: 100, schematicRelY: 110 },
-    ],
+    pins: (() => {
+      const miniLeftXs = [25, 40, 55, 70];
+      const miniRightXs = [110, 125, 140, 155];
+      const miniYs = [45, 65, 85, 105, 125, 145, 165, 185, 205];
+      const p: Pin[] = [
+        { id: 'bb_vcc', name: 'Power Rail (+)', relX: 30, relY: 22, schematicRelX: 20, schematicRelY: 20, isPositive: true },
+        { id: 'bb_gnd', name: 'GND Rail (-)', relX: 150, relY: 22, schematicRelX: 100, schematicRelY: 20, isNegative: true },
+      ];
+
+      miniYs.forEach((y, rowIdx) => {
+        const rNum = rowIdx + 1;
+        miniLeftXs.forEach((x, colIdx) => {
+          const pinId = colIdx === 1 && rNum <= 4 ? `bb_row${rNum}_a` : `mini_l_${rNum}_${colIdx}`;
+          p.push({
+            id: pinId,
+            name: `Row ${rNum} Left (Hole ${colIdx + 1})`,
+            relX: x,
+            relY: y,
+            schematicRelX: 20 + colIdx * 8,
+            schematicRelY: 35 + rowIdx * 8,
+          });
+        });
+        miniRightXs.forEach((x, colIdx) => {
+          const pinId = colIdx === 2 && rNum <= 4 ? `bb_row${rNum}_b` : `mini_r_${rNum}_${colIdx}`;
+          p.push({
+            id: pinId,
+            name: `Row ${rNum} Right (Hole ${colIdx + 1})`,
+            relX: x,
+            relY: y,
+            schematicRelX: 80 + colIdx * 8,
+            schematicRelY: 35 + rowIdx * 8,
+          });
+        });
+      });
+      return p;
+    })(),
   },
   breadboard_half: {
     type: 'breadboard_half',
@@ -687,26 +711,116 @@ export const COMPONENT_TEMPLATES: Record<string, ComponentTemplate> = {
     height: 280,
     schematicWidth: 160,
     schematicHeight: 140,
-    pins: [
-      { id: 'rail_pos_1', name: 'Top Rail (+) Left', relX: 30, relY: 28, schematicRelX: 20, schematicRelY: 20, isPositive: true },
-      { id: 'rail_pos_top_r', name: 'Top Rail (+) Right', relX: 230, relY: 28, schematicRelX: 140, schematicRelY: 20, isPositive: true },
-      { id: 'rail_neg_1', name: 'Top Rail (-) Left', relX: 30, relY: 52, schematicRelX: 20, schematicRelY: 40, isNegative: true },
-      { id: 'rail_neg_top_r', name: 'Top Rail (-) Right', relX: 230, relY: 52, schematicRelX: 140, schematicRelY: 40, isNegative: true },
-      { id: 'bb_r1', name: 'Terminal Row 1 Top (A-E)', relX: 55, relY: 104, schematicRelX: 40, schematicRelY: 65 },
-      { id: 'bb_r1_b', name: 'Terminal Row 1 Bot (F-J)', relX: 55, relY: 176, schematicRelX: 40, schematicRelY: 95 },
-      { id: 'bb_r2', name: 'Terminal Row 2 Top (A-E)', relX: 95, relY: 104, schematicRelX: 65, schematicRelY: 65 },
-      { id: 'bb_r2_b', name: 'Terminal Row 2 Bot (F-J)', relX: 95, relY: 176, schematicRelX: 65, schematicRelY: 95 },
-      { id: 'bb_r3', name: 'Terminal Row 3 Top (A-E)', relX: 135, relY: 104, schematicRelX: 90, schematicRelY: 65 },
-      { id: 'bb_r3_b', name: 'Terminal Row 3 Bot (F-J)', relX: 135, relY: 176, schematicRelX: 90, schematicRelY: 95 },
-      { id: 'bb_r4', name: 'Terminal Row 4 Top (A-E)', relX: 175, relY: 104, schematicRelX: 115, schematicRelY: 65 },
-      { id: 'bb_r4_b', name: 'Terminal Row 4 Bot (F-J)', relX: 175, relY: 176, schematicRelX: 115, schematicRelY: 95 },
-      { id: 'bb_r5', name: 'Terminal Row 5 Top (A-E)', relX: 215, relY: 104, schematicRelX: 140, schematicRelY: 65 },
-      { id: 'bb_r5_b', name: 'Terminal Row 5 Bot (F-J)', relX: 215, relY: 176, schematicRelX: 140, schematicRelY: 95 },
-      { id: 'rail_neg_bot_l', name: 'Bottom Rail (-) Left', relX: 30, relY: 228, schematicRelX: 20, schematicRelY: 120, isNegative: true },
-      { id: 'rail_neg_2', name: 'Bottom Rail (-) Right', relX: 230, relY: 228, schematicRelX: 140, schematicRelY: 120, isNegative: true },
-      { id: 'rail_pos_bot_l', name: 'Bottom Rail (+) Left', relX: 30, relY: 252, schematicRelX: 20, schematicRelY: 135, isPositive: true },
-      { id: 'rail_pos_2', name: 'Bottom Rail (+) Right', relX: 230, relY: 252, schematicRelX: 140, schematicRelY: 135, isPositive: true },
-    ],
+    pins: (() => {
+      const powerXs = [30, 50, 70, 90, 110, 130, 150, 170, 190, 210, 230];
+      const terminalXs = [35, 55, 75, 95, 115, 135, 155, 175, 195, 215, 235];
+      const topBankYs = [80, 92, 104, 116, 128];
+      const botBankYs = [152, 164, 176, 188, 200];
+      const topLetters = ['a', 'b', 'c', 'd', 'e'];
+      const botLetters = ['f', 'g', 'h', 'i', 'j'];
+
+      const p: Pin[] = [];
+
+      // Top power rails (positive & negative)
+      powerXs.forEach((x, i) => {
+        const posId = i === 0 ? 'rail_pos_1' : i === powerXs.length - 1 ? 'rail_pos_top_r' : `rail_pos_top_${i}`;
+        const negId = i === 0 ? 'rail_neg_1' : i === powerXs.length - 1 ? 'rail_neg_top_r' : `rail_neg_top_${i}`;
+        p.push({
+          id: posId,
+          name: `Top Rail (+) Hole ${i + 1}`,
+          relX: x,
+          relY: 28,
+          schematicRelX: 20 + Math.floor(i * 10),
+          schematicRelY: 20,
+          isPositive: true,
+        });
+        p.push({
+          id: negId,
+          name: `Top Rail (-) Hole ${i + 1}`,
+          relX: x,
+          relY: 52,
+          schematicRelX: 20 + Math.floor(i * 10),
+          schematicRelY: 40,
+          isNegative: true,
+        });
+      });
+
+      // Top bank terminal rows (a-e for each column)
+      terminalXs.forEach((x, colIdx) => {
+        const colNum = colIdx + 1;
+        topBankYs.forEach((y, rowIdx) => {
+          const letter = topLetters[rowIdx];
+          // Backward compatible pin IDs for legacy r1..r5
+          let pinId = `c${colNum}_${letter}`;
+          if (rowIdx === 2) {
+            if (colNum === 2) pinId = 'bb_r1';
+            else if (colNum === 4) pinId = 'bb_r2';
+            else if (colNum === 6) pinId = 'bb_r3';
+            else if (colNum === 8) pinId = 'bb_r4';
+            else if (colNum === 10) pinId = 'bb_r5';
+          }
+          p.push({
+            id: pinId,
+            name: `Col ${colNum} (${letter})`,
+            relX: x,
+            relY: y,
+            schematicRelX: 30 + colIdx * 10,
+            schematicRelY: 60 + rowIdx * 6,
+          });
+        });
+      });
+
+      // Bottom bank terminal rows (f-j for each column)
+      terminalXs.forEach((x, colIdx) => {
+        const colNum = colIdx + 1;
+        botBankYs.forEach((y, rowIdx) => {
+          const letter = botLetters[rowIdx];
+          // Backward compatible pin IDs for legacy r1_b..r5_b
+          let pinId = `c${colNum}_${letter}`;
+          if (rowIdx === 2) {
+            if (colNum === 2) pinId = 'bb_r1_b';
+            else if (colNum === 4) pinId = 'bb_r2_b';
+            else if (colNum === 6) pinId = 'bb_r3_b';
+            else if (colNum === 8) pinId = 'bb_r4_b';
+            else if (colNum === 10) pinId = 'bb_r5_b';
+          }
+          p.push({
+            id: pinId,
+            name: `Col ${colNum} (${letter})`,
+            relX: x,
+            relY: y,
+            schematicRelX: 30 + colIdx * 10,
+            schematicRelY: 95 + rowIdx * 6,
+          });
+        });
+      });
+
+      // Bottom power rails (negative & positive)
+      powerXs.forEach((x, i) => {
+        const negId = i === 0 ? 'rail_neg_bot_l' : i === powerXs.length - 1 ? 'rail_neg_2' : `rail_neg_bot_${i}`;
+        const posId = i === 0 ? 'rail_pos_bot_l' : i === powerXs.length - 1 ? 'rail_pos_2' : `rail_pos_bot_${i}`;
+        p.push({
+          id: negId,
+          name: `Bottom Rail (-) Hole ${i + 1}`,
+          relX: x,
+          relY: 228,
+          schematicRelX: 20 + Math.floor(i * 10),
+          schematicRelY: 120,
+          isNegative: true,
+        });
+        p.push({
+          id: posId,
+          name: `Bottom Rail (+) Hole ${i + 1}`,
+          relX: x,
+          relY: 252,
+          schematicRelX: 20 + Math.floor(i * 10),
+          schematicRelY: 135,
+          isPositive: true,
+        });
+      });
+
+      return p;
+    })(),
   },
   arduino_uno: {
     type: 'arduino_uno',

@@ -64,25 +64,93 @@ export function solveCircuit(
   // Internal component connections (Breadboards, Push buttons, DIP switches, Relays)
   for (const comp of components) {
     if (comp.type === 'breadboard_mini') {
-      union(`${comp.id}:bb_row1_a`, `${comp.id}:bb_row1_b`);
-      union(`${comp.id}:bb_row2_a`, `${comp.id}:bb_row2_b`);
-      union(`${comp.id}:bb_row3_a`, `${comp.id}:bb_row3_b`);
-      union(`${comp.id}:bb_row4_a`, `${comp.id}:bb_row4_b`);
+      // Connect all holes in each row on the left side, and each row on the right side
+      for (let r = 1; r <= 9; r++) {
+        const leftHoles = [0, 1, 2, 3].map((c) => (c === 1 && r <= 4 ? `bb_row${r}_a` : `mini_l_${r}_${c}`));
+        for (let i = 1; i < leftHoles.length; i++) {
+          union(`${comp.id}:${leftHoles[0]}`, `${comp.id}:${leftHoles[i]}`);
+        }
+        const rightHoles = [0, 1, 2, 3].map((c) => (c === 2 && r <= 4 ? `bb_row${r}_b` : `mini_r_${r}_${c}`));
+        for (let i = 1; i < rightHoles.length; i++) {
+          union(`${comp.id}:${rightHoles[0]}`, `${comp.id}:${rightHoles[i]}`);
+        }
+      }
+      // Mini breadboard power rails
+      union(`${comp.id}:bb_vcc`, `${comp.id}:mini_l_1_0`);
+      union(`${comp.id}:bb_gnd`, `${comp.id}:mini_r_1_3`);
     } else if (comp.type === 'breadboard_half') {
-      // Connect top and bottom power rails along their lengths
-      union(`${comp.id}:rail_pos_1`, `${comp.id}:rail_pos_top_r`);
-      union(`${comp.id}:rail_neg_1`, `${comp.id}:rail_neg_top_r`);
-      union(`${comp.id}:rail_pos_2`, `${comp.id}:rail_pos_bot_l`);
-      union(`${comp.id}:rail_neg_2`, `${comp.id}:rail_neg_bot_l`);
-      // Also connect top to bottom rails for standard breadboard power distribution
+      // Connect ALL holes along the top positive power rail
+      const powerCount = 11;
+      const topPosHoles = Array.from({ length: powerCount }, (_, i) =>
+        i === 0 ? 'rail_pos_1' : i === powerCount - 1 ? 'rail_pos_top_r' : `rail_pos_top_${i}`
+      );
+      for (let i = 1; i < topPosHoles.length; i++) {
+        union(`${comp.id}:${topPosHoles[0]}`, `${comp.id}:${topPosHoles[i]}`);
+      }
+
+      // Connect ALL holes along the top negative power rail
+      const topNegHoles = Array.from({ length: powerCount }, (_, i) =>
+        i === 0 ? 'rail_neg_1' : i === powerCount - 1 ? 'rail_neg_top_r' : `rail_neg_top_${i}`
+      );
+      for (let i = 1; i < topNegHoles.length; i++) {
+        union(`${comp.id}:${topNegHoles[0]}`, `${comp.id}:${topNegHoles[i]}`);
+      }
+
+      // Connect ALL holes along the bottom negative power rail
+      const botNegHoles = Array.from({ length: powerCount }, (_, i) =>
+        i === 0 ? 'rail_neg_bot_l' : i === powerCount - 1 ? 'rail_neg_2' : `rail_neg_bot_${i}`
+      );
+      for (let i = 1; i < botNegHoles.length; i++) {
+        union(`${comp.id}:${botNegHoles[0]}`, `${comp.id}:${botNegHoles[i]}`);
+      }
+
+      // Connect ALL holes along the bottom positive power rail
+      const botPosHoles = Array.from({ length: powerCount }, (_, i) =>
+        i === 0 ? 'rail_pos_bot_l' : i === powerCount - 1 ? 'rail_pos_2' : `rail_pos_bot_${i}`
+      );
+      for (let i = 1; i < botPosHoles.length; i++) {
+        union(`${comp.id}:${botPosHoles[0]}`, `${comp.id}:${botPosHoles[i]}`);
+      }
+
+      // Connect top and bottom rails together for common breadboard rail distribution
       union(`${comp.id}:rail_pos_1`, `${comp.id}:rail_pos_2`);
       union(`${comp.id}:rail_neg_1`, `${comp.id}:rail_neg_2`);
-      // Connect terminal rows (columns across center trough)
-      union(`${comp.id}:bb_r1`, `${comp.id}:bb_r1_b`);
-      union(`${comp.id}:bb_r2`, `${comp.id}:bb_r2_b`);
-      union(`${comp.id}:bb_r3`, `${comp.id}:bb_r3_b`);
-      union(`${comp.id}:bb_r4`, `${comp.id}:bb_r4_b`);
-      union(`${comp.id}:bb_r5`, `${comp.id}:bb_r5_b`);
+
+      // Connect ALL 5 holes in each top bank column (rows a, b, c, d, e)
+      const topLetters = ['a', 'b', 'c', 'd', 'e'];
+      for (let col = 1; col <= 11; col++) {
+        const colPins = topLetters.map((l, rIdx) => {
+          if (rIdx === 2) {
+            if (col === 2) return 'bb_r1';
+            if (col === 4) return 'bb_r2';
+            if (col === 6) return 'bb_r3';
+            if (col === 8) return 'bb_r4';
+            if (col === 10) return 'bb_r5';
+          }
+          return `c${col}_${l}`;
+        });
+        for (let i = 1; i < colPins.length; i++) {
+          union(`${comp.id}:${colPins[0]}`, `${comp.id}:${colPins[i]}`);
+        }
+      }
+
+      // Connect ALL 5 holes in each bottom bank column (rows f, g, h, i, j)
+      const botLetters = ['f', 'g', 'h', 'i', 'j'];
+      for (let col = 1; col <= 11; col++) {
+        const colPins = botLetters.map((l, rIdx) => {
+          if (rIdx === 2) {
+            if (col === 2) return 'bb_r1_b';
+            if (col === 4) return 'bb_r2_b';
+            if (col === 6) return 'bb_r3_b';
+            if (col === 8) return 'bb_r4_b';
+            if (col === 10) return 'bb_r5_b';
+          }
+          return `c${col}_${l}`;
+        });
+        for (let i = 1; i < colPins.length; i++) {
+          union(`${comp.id}:${colPins[0]}`, `${comp.id}:${colPins[i]}`);
+        }
+      }
     } else if (comp.type === 'push_button') {
       // Connect tactile switch pins only when the button is pressed (ON)
       // When pressed, all 4 pins connect together so any wiring orientation works

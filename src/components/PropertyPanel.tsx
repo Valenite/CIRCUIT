@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import type { CircuitComponent, SimulationResult } from '../types/circuit';
 import { COMPONENT_TEMPLATES } from '../constants/components';
 import { X, Zap, Cpu, ToggleLeft, ToggleRight, Sliders } from 'lucide-react';
@@ -6,8 +6,6 @@ import { X, Zap, Cpu, ToggleLeft, ToggleRight, Sliders } from 'lucide-react';
 interface Props {
   component: CircuitComponent;
   simResult: SimulationResult;
-  anchorX: number; // Screen-space X of click
-  anchorY: number; // Screen-space Y of click
   onUpdateProperties: (id: string, props: Record<string, any>) => void;
   onClose: () => void;
 }
@@ -67,8 +65,6 @@ const PANEL_W = 280;
 export const PropertyPanel: React.FC<Props> = ({
   component,
   simResult,
-  anchorX,
-  anchorY,
   onUpdateProperties,
   onClose,
 }) => {
@@ -79,74 +75,16 @@ export const PropertyPanel: React.FC<Props> = ({
     (key) => component.properties[key] !== undefined
   );
 
-  // Compute stable panel position once on mount from anchor point
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Position right of cursor, clamped to viewport
-    const panelH = Math.min(520, 160 + relevantNumericProps.length * 74);
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    let left = anchorX + 16;
-    let top = anchorY - 16;
-
-    // Flip left if not enough space on right
-    if (left + PANEL_W > vw - 8) left = anchorX - PANEL_W - 16;
-    if (left < 8) left = 8;
-    if (top + panelH > vh - 8) top = vh - panelH - 8;
-    if (top < 8) top = 8;
-
-    setPos({ left, top });
-  // Only run on mount — anchor is stable from click event
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Draggable panel
-  const dragRef = useRef<{ startX: number; startY: number; origLeft: number; origTop: number } | null>(null);
-
-  const handleHeaderMouseDown = (e: React.MouseEvent) => {
-    if (!pos) return;
-    e.preventDefault();
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      origLeft: pos.left,
-      origTop: pos.top,
-    };
-    const onMove = (ev: MouseEvent) => {
-      if (!dragRef.current) return;
-      setPos({
-        left: dragRef.current.origLeft + ev.clientX - dragRef.current.startX,
-        top: dragRef.current.origTop + ev.clientY - dragRef.current.startY,
-      });
-    };
-    const onUp = () => {
-      dragRef.current = null;
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-  };
-
-  if (!pos) return null;
-
   return (
     <div
-      ref={panelRef}
-      className="fixed z-[60] pointer-events-auto select-none"
-      style={{ left: pos.left, top: pos.top, width: PANEL_W }}
+      className="fixed top-16 right-4 z-[60] pointer-events-auto select-none animate-in slide-in-from-right-4 fade-in duration-200"
+      style={{ width: PANEL_W }}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <div className="bg-[#0a0f1e]/98 border border-cyan-500/40 rounded-2xl shadow-[0_12px_60px_rgba(0,240,255,0.2)] backdrop-blur-2xl overflow-hidden">
+      <div className="bg-[#0a0f1e]/98 border border-cyan-500/40 rounded-2xl shadow-[0_12px_60px_rgba(0,240,255,0.25)] backdrop-blur-2xl overflow-hidden">
 
-        {/* Draggable Header */}
-        <div
-          className="flex items-center justify-between px-3.5 py-2.5 border-b border-slate-800/80 bg-gradient-to-r from-cyan-950/50 to-slate-900/50 cursor-grab active:cursor-grabbing"
-          onMouseDown={handleHeaderMouseDown}
-        >
+        {/* Header */}
+        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-slate-800/80 bg-gradient-to-r from-cyan-950/60 to-slate-900/60">
           <div className="flex items-center gap-2 min-w-0">
             <Cpu className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
             <div className="min-w-0">
@@ -157,7 +95,8 @@ export const PropertyPanel: React.FC<Props> = ({
           <button
             onClick={onClose}
             onMouseDown={(e) => e.stopPropagation()}
-            className="ml-2 p-1 text-slate-500 hover:text-white hover:bg-slate-700/60 rounded-lg transition-all shrink-0 cursor-pointer"
+            className="ml-2 p-1 text-slate-400 hover:text-white hover:bg-slate-700/60 rounded-lg transition-all shrink-0 cursor-pointer"
+            title="Close Panel"
           >
             <X className="w-3.5 h-3.5" />
           </button>
