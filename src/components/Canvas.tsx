@@ -108,6 +108,7 @@ export const Canvas: React.FC<Props> = ({
 
   // Hovered Wire for interactive handles
   const [hoveredWireId, setHoveredWireId] = useState<string | null>(null);
+  const lastWireCompletedTimeRef = useRef<number>(0);
 
   // Sound Engine sync for Buzzer
   useEffect(() => {
@@ -301,6 +302,7 @@ export const Canvas: React.FC<Props> = ({
           routingType: defaultRoutingMode,
         });
         soundEngine.playClick();
+        lastWireCompletedTimeRef.current = Date.now();
       }
       setWiringStart(null);
       setWiringCurrent(null);
@@ -342,6 +344,12 @@ export const Canvas: React.FC<Props> = ({
   // Pin click -> Start or Complete Wire IMMEDIATELY (no annoying popup menu!)
   const handlePinClick = (e: React.MouseEvent, comp: CircuitComponent, pin: Pin) => {
     e.stopPropagation();
+
+    // Prevent immediate re-trigger if click event fires right after mouse-up connection
+    if (Date.now() - lastWireCompletedTimeRef.current < 250) {
+      return;
+    }
+
     soundEngine.playClick();
     const pinPos = getPinPos(comp, pin);
 
@@ -356,6 +364,8 @@ export const Canvas: React.FC<Props> = ({
           color: '#94a3b8',
           routingType: defaultRoutingMode,
         });
+        soundEngine.playClick();
+        lastWireCompletedTimeRef.current = Date.now();
       }
       setWiringStart(null);
       setWiringCurrent(null);
@@ -487,33 +497,6 @@ export const Canvas: React.FC<Props> = ({
           />
         )}
 
-        {/* Component Name Badge with Dark Backdrop to Prevent Wire Clutter */}
-        <g transform={`translate(${w / 2}, ${h + 18})`} className="pointer-events-none select-none">
-          <rect
-            x={-Math.max(40, (comp.name || template?.title || '').length * 3.8) - 6}
-            y="-9"
-            width={Math.max(80, (comp.name || template?.title || '').length * 7.6) + 12}
-            height="18"
-            rx="5"
-            fill="#070a12"
-            fillOpacity="0.88"
-            stroke="#1e293b"
-            strokeWidth="1"
-          />
-          <text
-            x="0"
-            y="1"
-            fill="#94a3b8"
-            fontSize="10.5"
-            fontWeight="bold"
-            fontFamily="sans-serif"
-            textAnchor="middle"
-            dominantBaseline="central"
-          >
-            {comp.name || template?.title}
-          </text>
-        </g>
-
         {/* Pins and Terminal Snaps */}
         {comp.pins.map((pin) => {
           const px = viewMode === 'realistic' ? pin.relX : pin.schematicRelX;
@@ -564,11 +547,10 @@ export const Canvas: React.FC<Props> = ({
               transform={`translate(${px}, ${py})`}
               onMouseDown={(e) => {
                 e.stopPropagation();
-                handlePinClick(e, comp, pin);
               }}
               onMouseUp={(e) => {
+                e.stopPropagation();
                 if (wiringStart && (wiringStart.componentId !== comp.id || wiringStart.pinId !== pin.id)) {
-                  e.stopPropagation();
                   handlePinClick(e, comp, pin);
                 }
               }}
@@ -589,7 +571,7 @@ export const Canvas: React.FC<Props> = ({
               className="cursor-pointer"
             >
               {/* Invisible generous hit target for responsive clicking */}
-              <circle cx="0" cy="0" r={isBreadboard ? 7 : 14} fill="transparent" />
+              <circle cx="0" cy="0" r={isBreadboard ? 9 : 16} fill="transparent" />
 
               {/* Always-Present Realistic Pin Terminal Pad (For all components except breadboard sockets) */}
               {!isBreadboard && (
@@ -978,9 +960,9 @@ export const Canvas: React.FC<Props> = ({
             );
           })}
 
-          {/* Wiring Preview */}
+          {/* Wiring Preview (Must not intercept pointer events so user can click/release on pins!) */}
           {wiringStart && wiringCurrent && (
-            <g>
+            <g style={{ pointerEvents: 'none' }}>
               <line
                 x1={wiringStart.startX}
                 y1={wiringStart.startY}
