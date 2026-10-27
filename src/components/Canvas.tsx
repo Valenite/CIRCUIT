@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import type {
   CircuitComponent,
   Wire,
@@ -402,6 +402,203 @@ export const Canvas: React.FC<Props> = ({
     }
   };
 
+  // Track wire counts per pin for rendering multi-wire junction dots
+  const pinWireCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const w of wires) {
+      const keyA = `${w.fromComponentId}:${w.fromPinId}`;
+      const keyB = `${w.toComponentId}:${w.toPinId}`;
+      counts[keyA] = (counts[keyA] || 0) + 1;
+      counts[keyB] = (counts[keyB] || 0) + 1;
+    }
+    return counts;
+  }, [wires]);
+
+  const isBreadboardType = (type: string) =>
+    type === 'breadboard_half' || type === 'breadboard_mini';
+
+  // Render a component with realistic body, name badge, and clean interactive pins
+  const renderComponent = (comp: CircuitComponent) => {
+    const template = COMPONENT_TEMPLATES[comp.type];
+    const isSelected = selectedComponentId === comp.id;
+    const w = viewMode === 'realistic' ? (template?.width || 100) : (template?.schematicWidth || 80);
+    const h = viewMode === 'realistic' ? (template?.height || 80) : (template?.schematicHeight || 60);
+
+    return (
+      <g
+        key={comp.id}
+        transform={`translate(${comp.x}, ${comp.y}) rotate(${comp.rotation}, ${w / 2}, ${h / 2})`}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          onSelectComponent(comp.id);
+          onSelectWire(null);
+          const coords = getCanvasCoords(e);
+          setDraggedCompId(comp.id);
+          setMouseDownPos({ x: e.clientX, y: e.clientY });
+          setDragOffset({
+            x: coords.x - comp.x,
+            y: coords.y - comp.y,
+          });
+        }}
+        className="cursor-move"
+      >
+        {/* Visual Body */}
+        {viewMode === 'realistic' ? (
+          <RealisticComponent
+            component={comp}
+            simResult={simResult}
+            isSelected={isSelected}
+            onInteractiveClick={() => handleInteractiveClick(comp)}
+          />
+        ) : (
+          <SchematicComponent
+            component={comp}
+            simResult={simResult}
+            isSelected={isSelected}
+            onInteractiveClick={() => handleInteractiveClick(comp)}
+          />
+        )}
+
+        {/* Component Name Badge with Dark Backdrop to Prevent Wire Clutter */}
+        <g transform={`translate(${w / 2}, ${h + 18})`} className="pointer-events-none select-none">
+          <rect
+            x={-Math.max(40, (comp.name || template?.title || '').length * 3.8) - 6}
+            y="-9"
+            width={Math.max(80, (comp.name || template?.title || '').length * 7.6) + 12}
+            height="18"
+            rx="5"
+            fill="#070a12"
+            fillOpacity="0.88"
+            stroke="#1e293b"
+            strokeWidth="1"
+          />
+          <text
+            x="0"
+            y="1"
+            fill="#94a3b8"
+            fontSize="10.5"
+            fontWeight="bold"
+            fontFamily="sans-serif"
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
+            {comp.name || template?.title}
+          </text>
+        </g>
+
+        {/* Pins and Terminal Snaps */}
+        {comp.pins.map((pin) => {
+          const px = viewMode === 'realistic' ? pin.relX : pin.schematicRelX;
+          const py = viewMode === 'realistic' ? pin.relY : pin.schematicRelY;
+          const isHovered =
+            hoveredPin?.componentId === comp.id && hoveredPin?.pin.id === pin.id;
+          const isWiringSource =
+            wiringStart?.componentId === comp.id && wiringStart?.pinId === pin.id;
+
+          const shortLabel = getPinShortLabel(pin);
+          const hasBuiltinSilkscreen =
+            viewMode === 'realistic' &&
+            (comp.type === 'esp32' || comp.type === 'arduino_uno');
+
+          let labelOffsetX = 0;
+          let labelOffsetY = 0;
+          let textAnchor: 'start' | 'middle' | 'end' = 'middle';
+
+          const distFromLeft = px;
+          const distFromRight = w - px;
+          const distFromTop = py;
+          const distFromBottom = h - py;
+          const minDist = Math.min(distFromLeft, distFromRight, distFromTop, distFromBottom);
+
+          if (minDist === distFromTop) {
+            labelOffsetX = 0;
+            labelOffsetY = -14;
+            textAnchor = 'middle';
+          } else if (minDist === distFromBottom) {
+            labelOffsetX = 0;
+            labelOffsetY = 14;
+            textAnchor = 'middle';
+          } else if (minDist === distFromLeft) {
+            labelOffsetX = -13;
+            labelOffsetY = 0;
+            textAnchor = 'end';
+          } else {
+            labelOffsetX = 13;
+            labelOffsetY = 0;
+            textAnchor = 'start';
+          }
+
+          const isBreadboard = isBreadboardType(comp.type);
+
+          return (
+            <g
+              key={pin.id}
+              transform={`translate(${px}, ${py})`}
+              onClick={(e) => handlePinClick(e, comp, pin)}
+              onMouseEnter={() =>
+                setHoveredPin({
+                  componentId: comp.id,
+                  pin,
+                  compName: comp.name || template?.title || comp.type,
+                  x: comp.x + px,
+                  y: comp.y + py,
+                })
+              }
+              onMouseLeave={() => setHoveredPin(null)}
+              className="cursor-pointer"
+            >
+              {/* Invisible generous hit target for responsive clicking */}
+              <circle cx="0" cy="0" r={isBreadboard ? 7 : 14} fill="transparent" />
+
+              {/* Snap Indicator Ring — ONLY lights up when hovered or actively wiring! Completely clean otherwise! */}
+              {(isHovered || isWiringSource) && (
+                <circle
+                  cx="0"
+                  cy="0"
+                  r={isBreadboard ? 5.5 : 7.5}
+                  fill={isWiringSource ? '#00f0ff' : '#ffffff'}
+                  stroke="#00f0ff"
+                  strokeWidth={isBreadboard ? 2 : 2.5}
+                  filter="drop-shadow(0 0 6px #00f0ff)"
+                  className="transition-all animate-pulse"
+                />
+              )}
+
+              {/* Pin Labels (Toggleable) */}
+              {showPinLabels && !hasBuiltinSilkscreen && !isBreadboard && (
+                <g transform={`translate(${labelOffsetX}, ${labelOffsetY})`} className="pointer-events-none select-none">
+                  <rect
+                    x={textAnchor === 'middle' ? -9 : textAnchor === 'end' ? -18 : 0}
+                    y="-6.5"
+                    width="18"
+                    height="13"
+                    rx="3.5"
+                    fill="#070a12"
+                    fillOpacity="0.94"
+                    stroke={pin.isPositive ? '#ef4444' : pin.isNegative ? '#64748b' : '#00f0ff'}
+                    strokeWidth="1"
+                  />
+                  <text
+                    x={textAnchor === 'middle' ? 0 : textAnchor === 'end' ? -9 : 9}
+                    y="0.5"
+                    fill={pin.isPositive ? '#ef4444' : pin.isNegative ? '#cbd5e1' : '#38bdf8'}
+                    fontSize="8"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontFamily="ui-monospace, monospace"
+                  >
+                    {shortLabel}
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+      </g>
+    );
+  };
+
   return (
     <div
       className="relative w-full h-full overflow-hidden bg-[#070a12] select-none"
@@ -479,196 +676,8 @@ export const Canvas: React.FC<Props> = ({
         <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
           <rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid-dots)" />
 
-          {/* ================= COMPONENTS (Rendered First: Canvas Floor) ================= */}
-          {components.map((comp) => {
-            const template = COMPONENT_TEMPLATES[comp.type];
-            const isSelected = selectedComponentId === comp.id;
-            const w = viewMode === 'realistic' ? (template?.width || 100) : (template?.schematicWidth || 80);
-            const h = viewMode === 'realistic' ? (template?.height || 80) : (template?.schematicHeight || 60);
-
-            return (
-              <g
-                key={comp.id}
-                transform={`translate(${comp.x}, ${comp.y}) rotate(${comp.rotation}, ${w / 2}, ${h / 2})`}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  onSelectComponent(comp.id);
-                  onSelectWire(null);
-                  const coords = getCanvasCoords(e);
-                  setDraggedCompId(comp.id);
-                  setMouseDownPos({ x: e.clientX, y: e.clientY });
-                  setDragOffset({
-                    x: coords.x - comp.x,
-                    y: coords.y - comp.y,
-                  });
-                }}
-                className="cursor-move"
-              >
-                {/* Visual Body */}
-                {viewMode === 'realistic' ? (
-                  <RealisticComponent
-                    component={comp}
-                    simResult={simResult}
-                    isSelected={isSelected}
-                    onInteractiveClick={() => handleInteractiveClick(comp)}
-                  />
-                ) : (
-                  <SchematicComponent
-                    component={comp}
-                    simResult={simResult}
-                    isSelected={isSelected}
-                    onInteractiveClick={() => handleInteractiveClick(comp)}
-                  />
-                )}
-
-                {/* Component Name Badge with Dark Backdrop to Prevent Wire Clutter */}
-                <g transform={`translate(${w / 2}, ${h + 18})`} className="pointer-events-none select-none">
-                  <rect
-                    x={-Math.max(40, (comp.name || template?.title || '').length * 3.8) - 6}
-                    y="-9"
-                    width={Math.max(80, (comp.name || template?.title || '').length * 7.6) + 12}
-                    height="18"
-                    rx="5"
-                    fill="#070a12"
-                    fillOpacity="0.88"
-                    stroke="#1e293b"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x="0"
-                    y="1"
-                    fill="#94a3b8"
-                    fontSize="10.5"
-                    fontWeight="bold"
-                    fontFamily="sans-serif"
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                  >
-                    {comp.name || template?.title}
-                  </text>
-                </g>
-
-                {/* Pins and Terminal Snaps with ALWAYS-VISIBLE PIN LABELS */}
-                {comp.pins.map((pin) => {
-                  const px = viewMode === 'realistic' ? pin.relX : pin.schematicRelX;
-                  const py = viewMode === 'realistic' ? pin.relY : pin.schematicRelY;
-                  const isHovered =
-                    hoveredPin?.componentId === comp.id && hoveredPin?.pin.id === pin.id;
-                  const isWiringSource =
-                    wiringStart?.componentId === comp.id && wiringStart?.pinId === pin.id;
-
-                  const shortLabel = getPinShortLabel(pin);
-
-                  const hasBuiltinSilkscreen =
-                    viewMode === 'realistic' &&
-                    (comp.type === 'esp32' || comp.type === 'arduino_uno');
-
-                  // Directionally aware pin label placement: point OUTWARDS away from component body
-                  let labelOffsetX = 0;
-                  let labelOffsetY = 0;
-                  let textAnchor: 'start' | 'middle' | 'end' = 'middle';
-
-                  const distFromLeft = px;
-                  const distFromRight = w - px;
-                  const distFromTop = py;
-                  const distFromBottom = h - py;
-                  const minDist = Math.min(distFromLeft, distFromRight, distFromTop, distFromBottom);
-
-                  if (minDist === distFromTop) {
-                    labelOffsetX = 0;
-                    labelOffsetY = -14;
-                    textAnchor = 'middle';
-                  } else if (minDist === distFromBottom) {
-                    labelOffsetX = 0;
-                    labelOffsetY = 14;
-                    textAnchor = 'middle';
-                  } else if (minDist === distFromLeft) {
-                    labelOffsetX = -13;
-                    labelOffsetY = 0;
-                    textAnchor = 'end';
-                  } else {
-                    labelOffsetX = 13;
-                    labelOffsetY = 0;
-                    textAnchor = 'start';
-                  }
-
-                  const isBreadboard = comp.type === 'breadboard_half' || comp.type === 'breadboard_mini';
-                  const snapRadius = isBreadboard
-                    ? isHovered || isWiringSource ? 5.5 : 2.5
-                    : isHovered || isWiringSource ? 7.5 : 4.5;
-
-                  return (
-                    <g
-                      key={pin.id}
-                      transform={`translate(${px}, ${py})`}
-                      onClick={(e) => handlePinClick(e, comp, pin)}
-                      onMouseEnter={() =>
-                        setHoveredPin({
-                          componentId: comp.id,
-                          pin,
-                          compName: comp.name || template?.title || comp.type,
-                          x: comp.x + px,
-                          y: comp.y + py,
-                        })
-                      }
-                      onMouseLeave={() => setHoveredPin(null)}
-                      className="cursor-pointer"
-                    >
-                      <circle cx="0" cy="0" r={isBreadboard ? 7 : 14} fill="transparent" />
-
-                      {/* Snap Indicator Ring */}
-                      <circle
-                        cx="0"
-                        cy="0"
-                        r={snapRadius}
-                        fill={
-                          isWiringSource
-                            ? '#00f0ff'
-                            : pin.isPositive
-                            ? '#ef4444'
-                            : pin.isNegative
-                            ? '#0f172a'
-                            : '#64748b'
-                        }
-                        stroke={isHovered || isWiringSource ? '#ffffff' : '#e2e8f0'}
-                        strokeWidth={isHovered || isWiringSource ? (isBreadboard ? 2 : 3) : (isBreadboard ? 1 : 1.5)}
-                        className="transition-all"
-                      />
-
-                      {/* CLEAR PIN LABELS: Visible on all components with dark pill backdrop */}
-                      {showPinLabels && !hasBuiltinSilkscreen && !isBreadboard && (
-                        <g transform={`translate(${labelOffsetX}, ${labelOffsetY})`} className="pointer-events-none select-none">
-                          <rect
-                            x={textAnchor === 'middle' ? -9 : textAnchor === 'end' ? -18 : 0}
-                            y="-6.5"
-                            width="18"
-                            height="13"
-                            rx="3.5"
-                            fill="#070a12"
-                            fillOpacity="0.94"
-                            stroke={pin.isPositive ? '#ef4444' : pin.isNegative ? '#64748b' : '#00f0ff'}
-                            strokeWidth="1"
-                          />
-                          <text
-                            x={textAnchor === 'middle' ? 0 : textAnchor === 'end' ? -9 : 9}
-                            y="0.5"
-                            fill={pin.isPositive ? '#ef4444' : pin.isNegative ? '#cbd5e1' : '#38bdf8'}
-                            fontSize="8"
-                            fontWeight="bold"
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            fontFamily="ui-monospace, monospace"
-                          >
-                            {shortLabel}
-                          </text>
-                        </g>
-                      )}
-                    </g>
-                  );
-                })}
-              </g>
-            );
-          })}
+          {/* ================= 1. BREADBOARDS (Base Layer: Underneath Wires) ================= */}
+          {components.filter((c) => isBreadboardType(c.type)).map(renderComponent)}
 
           {/* ================= WIRES (Rendered ON TOP of Components for Perfect Cirkit-Style Visibility) ================= */}
           {wires.map((wire) => {
@@ -701,6 +710,11 @@ export const Canvas: React.FC<Props> = ({
 
             const midX = Math.round((posA.x + posB.x) / 2);
             const midY = Math.round((posA.y + posB.y) / 2);
+
+            const isMultiA = (pinWireCounts[`${fromComp.id}:${fromPin.id}`] || 0) > 1;
+            const isMultiB = (pinWireCounts[`${toComp.id}:${toPin.id}`] || 0) > 1;
+            const isFromBreadboard = isBreadboardType(fromComp.type);
+            const isToBreadboard = isBreadboardType(toComp.type);
 
             return (
               <g
@@ -804,31 +818,28 @@ export const Canvas: React.FC<Props> = ({
                   />
                 )}
 
-                {/* ── Cirkit-style Terminal Connection Dots at Both Ends ── */}
+                {/* ── Multi-Wire Junction Dots / Breadboard Connection Dots ── */}
                 <g style={{ pointerEvents: 'none' }}>
-                  {/* Pin A Terminal */}
-                  <circle
-                    cx={posA.x}
-                    cy={posA.y}
-                    r="4.8"
-                    fill={wire.color || '#3b82f6'}
-                    stroke="#070b14"
-                    strokeWidth="1.5"
-                    opacity="0.96"
-                  />
-                  <circle cx={posA.x} cy={posA.y} r="1.6" fill="#070b14" opacity="0.9" />
-
-                  {/* Pin B Terminal */}
-                  <circle
-                    cx={posB.x}
-                    cy={posB.y}
-                    r="4.8"
-                    fill={wire.color || '#3b82f6'}
-                    stroke="#070b14"
-                    strokeWidth="1.5"
-                    opacity="0.96"
-                  />
-                  <circle cx={posB.x} cy={posB.y} r="1.6" fill="#070b14" opacity="0.9" />
+                  {(isMultiA || isFromBreadboard) && (
+                    <circle
+                      cx={posA.x}
+                      cy={posA.y}
+                      r={isFromBreadboard ? 3.2 : 3.8}
+                      fill={wire.color || '#3b82f6'}
+                      stroke="#070b14"
+                      strokeWidth="1.2"
+                    />
+                  )}
+                  {(isMultiB || isToBreadboard) && (
+                    <circle
+                      cx={posB.x}
+                      cy={posB.y}
+                      r={isToBreadboard ? 3.2 : 3.8}
+                      fill={wire.color || '#3b82f6'}
+                      stroke="#070b14"
+                      strokeWidth="1.2"
+                    />
+                  )}
                 </g>
 
                 {/* ================= DRAGGABLE WAYPOINT BEND HANDLES ================= */}
@@ -894,6 +905,9 @@ export const Canvas: React.FC<Props> = ({
               </g>
             );
           })}
+
+          {/* ================= 3. DISCRETE COMPONENTS (Foreground: On top of wires so leads connect cleanly without slicing across components) ================= */}
+          {components.filter((c) => !isBreadboardType(c.type)).map(renderComponent)}
 
           {/* Wiring Preview */}
           {wiringStart && wiringCurrent && (
