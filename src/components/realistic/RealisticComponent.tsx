@@ -211,25 +211,40 @@ export const RealisticComponent: React.FC<Props> = ({
         return (
           <g>
             {/* Blue breakout PCB */}
-            <rect x="5" y="15" width="130" height="55" rx="6" fill="#0284c7" stroke="#0369a1" strokeWidth="2" />
+            <rect x="5" y="12" width="130" height="72" rx="6" fill="#0284c7" stroke="#0369a1" strokeWidth="2" />
             {/* Left Ultrasonic Can (Transmitter 'T') */}
-            <circle cx="35" cy="42" r="22" fill="#e2e8f0" stroke="#64748b" strokeWidth="2.5" />
-            <circle cx="35" cy="42" r="14" fill="#cbd5e1" stroke="#94a3b8" />
-            <text x="35" y="46" fill="#0f172a" fontSize="12" fontWeight="bold" textAnchor="middle">
+            <circle cx="35" cy="38" r="21" fill="#e2e8f0" stroke="#64748b" strokeWidth="2.5" />
+            <circle cx="35" cy="38" r="13" fill="#cbd5e1" stroke="#94a3b8" />
+            <text x="35" y="42" fill="#0f172a" fontSize="11" fontWeight="bold" textAnchor="middle">
               T
             </text>
             {/* Right Ultrasonic Can (Receiver 'R') */}
-            <circle cx="105" cy="42" r="22" fill="#e2e8f0" stroke="#64748b" strokeWidth="2.5" />
-            <circle cx="105" cy="42" r="14" fill="#cbd5e1" stroke="#94a3b8" />
-            <text x="105" y="46" fill="#0f172a" fontSize="12" fontWeight="bold" textAnchor="middle">
+            <circle cx="105" cy="38" r="21" fill="#e2e8f0" stroke="#64748b" strokeWidth="2.5" />
+            <circle cx="105" cy="38" r="13" fill="#cbd5e1" stroke="#94a3b8" />
+            <text x="105" y="42" fill="#0f172a" fontSize="11" fontWeight="bold" textAnchor="middle">
               R
             </text>
-            <text x="70" y="32" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
+            {/* Crystal Oscillator in metal can */}
+            <rect x="62" y="22" width="16" height="8" rx="3" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="0.8" />
+            <text x="70" y="27" fill="#64748b" fontSize="3.5" fontWeight="bold" textAnchor="middle">10.000</text>
+            <text x="70" y="38" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle">
               HC-SR04
             </text>
-            <text x="70" y="60" fill="#bae6fd" fontSize="9" fontFamily="monospace" textAnchor="middle">
+            <text x="70" y="52" fill="#bae6fd" fontSize="9" fontFamily="monospace" textAnchor="middle">
               {dist} cm
             </text>
+            {/* Pin header bar at y=80 with silkscreen labels */}
+            <rect x="35" y="66" width="65" height="15" rx="2" fill="#0f172a" fillOpacity="0.75" />
+            <text x="45" y="72" fill="#fca5a5" fontSize="5" fontWeight="bold" textAnchor="middle">VCC</text>
+            <text x="60" y="72" fill="#93c5fd" fontSize="5" fontWeight="bold" textAnchor="middle">TRIG</text>
+            <text x="75" y="72" fill="#fde047" fontSize="5" fontWeight="bold" textAnchor="middle">ECHO</text>
+            <text x="90" y="72" fill="#cbd5e1" fontSize="5" fontWeight="bold" textAnchor="middle">GND</text>
+            {[45, 60, 75, 90].map((px) => (
+              <g key={px}>
+                <circle cx={px} cy="80" r="4.2" fill="#ca8a04" stroke="#fde047" strokeWidth="1" />
+                <circle cx={px} cy="80" r="1.8" fill="#070a12" />
+              </g>
+            ))}
           </g>
         );
       }
@@ -237,23 +252,67 @@ export const RealisticComponent: React.FC<Props> = ({
       case 'mpu_6050': {
         const pitch = component.properties.imuTilt?.pitch ?? 0;
         const roll = component.properties.imuTilt?.roll ?? 0;
+        const pins = [
+          { name: 'VCC', x: 16, color: '#fca5a5' },
+          { name: 'GND', x: 29, color: '#cbd5e1' },
+          { name: 'SCL', x: 42, color: '#93c5fd' },
+          { name: 'SDA', x: 55, color: '#93c5fd' },
+          { name: 'XDA', x: 68, color: '#cbd5e1' },
+          { name: 'XCL', x: 81, color: '#cbd5e1' },
+          { name: 'AD0', x: 94, color: '#cbd5e1' },
+          { name: 'INT', x: 107, color: '#fde047' },
+        ];
         return (
           <g>
-            {/* Blue breakout PCB */}
-            <rect x="5" y="5" width="100" height="80" rx="6" fill="#1d4ed8" stroke="#1e40af" strokeWidth="2" />
-            {/* MPU-6050 QFN chip */}
-            <rect x="35" y="18" width="30" height="30" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
-            <circle cx="40" cy="23" r="2" fill="#e2e8f0" />
-            <text x="50" y="35" fill="#f8fafc" fontSize="6" fontWeight="bold" textAnchor="middle">
+            {/* GY-521 Royal Blue Breakout PCB */}
+            <rect x="4" y="4" width="112" height="86" rx="6" fill="#1e40af" stroke="#1d4ed8" strokeWidth="2" />
+            <rect x="7" y="7" width="106" height="80" rx="4" fill="#1d4ed8" fillOpacity="0.4" />
+            {/* Corner Mounting Hole with Gold Ring */}
+            <circle cx="15" cy="18" r="4.5" fill="#070a12" stroke="#eab308" strokeWidth="1.5" />
+            {/* On-board 3.3V LDO Voltage Regulator (KB33 / SOT-23) */}
+            <rect x="85" y="14" width="16" height="11" rx="1.5" fill="#0f172a" stroke="#334155" strokeWidth="1" />
+            <line x1="88" y1="11" x2="88" y2="14" stroke="#cbd5e1" strokeWidth="1.5" />
+            <line x1="98" y1="11" x2="98" y2="14" stroke="#cbd5e1" strokeWidth="1.5" />
+            <line x1="93" y1="25" x2="93" y2="28" stroke="#cbd5e1" strokeWidth="1.5" />
+            {/* Power Status LED */}
+            <circle cx="93" cy="36" r="2.5" fill="#ef4444" filter="drop-shadow(0 0 4px #ef4444)" />
+            <text x="93" y="44" fill="#cbd5e1" fontSize="4.5" fontWeight="bold" textAnchor="middle">PWR</text>
+            {/* Central InvenSense MPU-6050 QFN-24 Chip */}
+            <rect x="42" y="16" width="34" height="34" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+            {/* Pin 1 Index Dot */}
+            <circle cx="47" cy="21" r="1.5" fill="#e2e8f0" />
+            <text x="59" y="30" fill="#f8fafc" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
               MPU
             </text>
-            <text x="50" y="43" fill="#f8fafc" fontSize="6" fontWeight="bold" textAnchor="middle">
+            <text x="59" y="40" fill="#f8fafc" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
               6050
             </text>
             {/* Live Orientation Tag */}
-            <text x="50" y="65" fill="#93c5fd" fontSize="8" fontFamily="monospace" textAnchor="middle">
+            <rect x="36" y="53" width="46" height="12" rx="3" fill="#070a12" fillOpacity="0.85" stroke="#1e3a8a" strokeWidth="1" />
+            <text x="59" y="61" fill="#93c5fd" fontSize="7" fontFamily="monospace" fontWeight="bold" textAnchor="middle" dominantBaseline="central">
               P:{pitch}° R:{roll}°
             </text>
+            {/* 8-Pin Header Bar Strip at bottom y=78 with crisp silkscreen labels */}
+            <rect x="8" y="68" width="104" height="19" rx="3" fill="#070a12" fillOpacity="0.6" />
+            {pins.map((p) => (
+              <g key={p.name}>
+                {/* Silkscreen text right above each pin */}
+                <text
+                  x={p.x}
+                  y="73"
+                  fill={p.color}
+                  fontSize="4.5"
+                  fontWeight="bold"
+                  textAnchor="middle"
+                  fontFamily="ui-monospace, monospace"
+                >
+                  {p.name}
+                </text>
+                {/* Gold through-hole solder eyelet pad */}
+                <circle cx={p.x} cy="78" r="4.2" fill="#ca8a04" stroke="#fde047" strokeWidth="1" />
+                <circle cx={p.x} cy="78" r="1.8" fill="#070a12" />
+              </g>
+            ))}
           </g>
         );
       }
@@ -261,11 +320,19 @@ export const RealisticComponent: React.FC<Props> = ({
       case 'dht22': {
         return (
           <g>
+            {/* 4 Metal Lead pins extending down from grille to y=90 */}
+            {[20, 35, 50, 65].map((lx) => (
+              <g key={lx}>
+                <line x1={lx} y1="78" x2={lx} y2="90" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx={lx} cy="90" r="3.5" fill="#ca8a04" stroke="#fde047" strokeWidth="0.8" />
+                <circle cx={lx} cy="90" r="1.5" fill="#070a12" />
+              </g>
+            ))}
             {/* White plastic grille casing */}
-            <rect x="10" y="10" width="60" height="75" rx="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
+            <rect x="10" y="8" width="60" height="72" rx="5" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2" />
             {/* Grille slots */}
-            {[22, 32, 42, 52].map((y) => (
-              <rect key={y} x="20" y={y} width="40" height="4" rx="2" fill="#94a3b8" />
+            {[18, 28, 38, 48, 58].map((y) => (
+              <rect key={y} x="18" y={y} width="44" height="4" rx="2" fill="#94a3b8" />
             ))}
             <text x="40" y="70" fill="#0284c7" fontSize="8" fontWeight="bold" textAnchor="middle">
               AM2302
@@ -278,17 +345,27 @@ export const RealisticComponent: React.FC<Props> = ({
         const isMotion = Boolean(component.properties.motionDetected);
         return (
           <g>
-            <rect x="10" y="10" width="80" height="70" rx="6" fill="#047857" stroke="#065f46" strokeWidth="2" />
+            <rect x="10" y="8" width="80" height="78" rx="6" fill="#047857" stroke="#065f46" strokeWidth="2" />
             {/* White domed Fresnel lens */}
-            <circle cx="50" cy="42" r="26" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
-            <circle cx="50" cy="42" r="18" fill="none" stroke="#94a3b8" strokeDasharray="3 3" />
-            <circle cx="50" cy="42" r="8" fill="none" stroke="#94a3b8" strokeDasharray="2 2" />
+            <circle cx="50" cy="40" r="25" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="1.5" />
+            <circle cx="50" cy="40" r="17" fill="none" stroke="#94a3b8" strokeDasharray="3 3" />
+            <circle cx="50" cy="40" r="8" fill="none" stroke="#94a3b8" strokeDasharray="2 2" />
             {isMotion && (
-              <circle cx="50" cy="42" r="26" fill="#f59e0b" opacity="0.4" filter="blur(4px)" />
+              <circle cx="50" cy="40" r="25" fill="#f59e0b" opacity="0.4" filter="blur(4px)" />
             )}
-            <text x="50" y="75" fill="#a7f3d0" fontSize="8" fontWeight="bold" textAnchor="middle">
+            <text x="50" y="70" fill="#a7f3d0" fontSize="7" fontWeight="bold" textAnchor="middle">
               HC-SR501
             </text>
+            {/* 3 Header pins at bottom y=82 with silkscreen */}
+            <text x="30" y="77" fill="#86efac" fontSize="4.5" fontWeight="bold" textAnchor="middle">VCC</text>
+            <text x="50" y="77" fill="#86efac" fontSize="4.5" fontWeight="bold" textAnchor="middle">OUT</text>
+            <text x="70" y="77" fill="#86efac" fontSize="4.5" fontWeight="bold" textAnchor="middle">GND</text>
+            {[30, 50, 70].map((px) => (
+              <g key={px}>
+                <circle cx={px} cy="82" r="4.2" fill="#ca8a04" stroke="#fde047" strokeWidth="1" />
+                <circle cx={px} cy="82" r="1.8" fill="#070a12" />
+              </g>
+            ))}
           </g>
         );
       }

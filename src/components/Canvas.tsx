@@ -210,6 +210,13 @@ export const Canvas: React.FC<Props> = ({
 
   // Canvas Mouse Down - Right Click or Middle Click PANS from anywhere!
   const handleMouseDown = (e: React.MouseEvent) => {
+    // If currently routing a wire and clicked on empty canvas, cancel the active wire
+    if (wiringStart) {
+      setWiringStart(null);
+      setWiringCurrent(null);
+      return;
+    }
+
     // Right click (button === 2) or middle click (button === 1) starts panning from anywhere!
     if (e.button === 2 || e.button === 1) {
       e.preventDefault();
@@ -282,6 +289,27 @@ export const Canvas: React.FC<Props> = ({
 
   // Canvas Mouse Up
   const handleMouseUp = (e: React.MouseEvent) => {
+    // If user was dragging a wire from pin A and released over hoveredPin, complete connection immediately!
+    if (wiringStart && hoveredPin) {
+      if (wiringStart.componentId !== hoveredPin.componentId || wiringStart.pinId !== hoveredPin.pin.id) {
+        onAddWire({
+          fromComponentId: wiringStart.componentId,
+          fromPinId: wiringStart.pinId,
+          toComponentId: hoveredPin.componentId,
+          toPinId: hoveredPin.pin.id,
+          color: '#94a3b8',
+          routingType: defaultRoutingMode,
+        });
+        soundEngine.playClick();
+      }
+      setWiringStart(null);
+      setWiringCurrent(null);
+      setIsPanning(false);
+      setDraggedCompId(null);
+      setMouseDownPos(null);
+      return;
+    }
+
     // If user was dragging a wire waypoint
     if (draggedWaypoint) {
       if (draggedWaypoint.isNew) {
@@ -534,7 +562,20 @@ export const Canvas: React.FC<Props> = ({
             <g
               key={pin.id}
               transform={`translate(${px}, ${py})`}
-              onClick={(e) => handlePinClick(e, comp, pin)}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                handlePinClick(e, comp, pin);
+              }}
+              onMouseUp={(e) => {
+                if (wiringStart && (wiringStart.componentId !== comp.id || wiringStart.pinId !== pin.id)) {
+                  e.stopPropagation();
+                  handlePinClick(e, comp, pin);
+                }
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePinClick(e, comp, pin);
+              }}
               onMouseEnter={() =>
                 setHoveredPin({
                   componentId: comp.id,
@@ -550,14 +591,45 @@ export const Canvas: React.FC<Props> = ({
               {/* Invisible generous hit target for responsive clicking */}
               <circle cx="0" cy="0" r={isBreadboard ? 7 : 14} fill="transparent" />
 
-              {/* Snap Indicator Ring — ONLY lights up when hovered or actively wiring! Completely clean otherwise! */}
+              {/* Always-Present Realistic Pin Terminal Pad (For all components except breadboard sockets) */}
+              {!isBreadboard && (
+                <g style={{ pointerEvents: 'none' }}>
+                  {/* Outer plated through-hole (PTH) eyelet with polarity coding */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="4.2"
+                    fill={
+                      pin.isPositive
+                        ? '#ef4444'
+                        : pin.isNegative
+                        ? '#0f172a'
+                        : '#ca8a04'
+                    }
+                    stroke={
+                      pin.isPositive
+                        ? '#fca5a5'
+                        : pin.isNegative
+                        ? '#475569'
+                        : '#fde047'
+                    }
+                    strokeWidth="1.2"
+                    opacity="0.95"
+                  />
+                  {/* Inner drill hole / pin socket */}
+                  <circle cx="0" cy="0" r="1.8" fill="#070a12" />
+                </g>
+              )}
+
+              {/* Snap Indicator Ring — Lights up with cyan glow when hovered or actively wiring */}
               {(isHovered || isWiringSource) && (
                 <circle
                   cx="0"
                   cy="0"
                   r={isBreadboard ? 5.5 : 7.5}
-                  fill={isWiringSource ? '#00f0ff' : '#ffffff'}
-                  stroke="#00f0ff"
+                  fill={isWiringSource ? '#00f0ff' : '#38bdf8'}
+                  fillOpacity="0.35"
+                  stroke="#ffffff"
                   strokeWidth={isBreadboard ? 2 : 2.5}
                   filter="drop-shadow(0 0 6px #00f0ff)"
                   className="transition-all animate-pulse"
@@ -676,8 +748,8 @@ export const Canvas: React.FC<Props> = ({
         <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
           <rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid-dots)" />
 
-          {/* ================= 1. BREADBOARDS (Base Layer: Underneath Wires) ================= */}
-          {components.filter((c) => isBreadboardType(c.type)).map(renderComponent)}
+          {/* ================= 1. ALL COMPONENTS (Rendered First: Canvas Floor) ================= */}
+          {components.map(renderComponent)}
 
           {/* ================= WIRES (Rendered ON TOP of Components for Perfect Cirkit-Style Visibility) ================= */}
           {wires.map((wire) => {
@@ -905,9 +977,6 @@ export const Canvas: React.FC<Props> = ({
               </g>
             );
           })}
-
-          {/* ================= 3. DISCRETE COMPONENTS (Foreground: On top of wires so leads connect cleanly without slicing across components) ================= */}
-          {components.filter((c) => !isBreadboardType(c.type)).map(renderComponent)}
 
           {/* Wiring Preview */}
           {wiringStart && wiringCurrent && (
