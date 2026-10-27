@@ -1336,8 +1336,8 @@ export const RealisticComponent: React.FC<Props> = ({
         const isPowered = output.powered;
         return (
           <g>
-            {/* Dark Blue/Black High-Tech Matte PCB */}
-            <rect x="5" y="5" width="80" height="150" rx="6" fill="#0b1329" stroke="#1e293b" strokeWidth="2.5" />
+            {/* Dark Blue/Black High-Tech Matte PCB — 110×160 to match template */}
+            <rect x="5" y="5" width="100" height="150" rx="6" fill="#0b1329" stroke="#1e293b" strokeWidth="2.5" />
             {/* Gold Meandering PCB Antenna at Top Edge */}
             <path
               d="M 20 18 L 20 10 L 26 10 L 26 18 L 32 18 L 32 10 L 38 10 L 38 18 L 44 18 L 44 10 L 50 10 L 50 18 L 56 18 L 56 10 L 62 10 L 62 18 L 68 18 L 68 10"
@@ -1347,53 +1347,55 @@ export const RealisticComponent: React.FC<Props> = ({
               strokeLinecap="square"
             />
             {/* Silver Metal RF Shield Can covering ESP32-C3FN4 RISC-V SoC */}
-            <rect x="16" y="24" width="58" height="54" rx="2" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.5" />
-            <rect x="18" y="26" width="54" height="50" rx="1.5" fill="#94a3b8" />
-            <text x="45" y="42" fill="#0f172a" fontSize="7.5" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+            <rect x="20" y="24" width="65" height="54" rx="2" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.5" />
+            <rect x="22" y="26" width="61" height="50" rx="1.5" fill="#94a3b8" />
+            <text x="52" y="42" fill="#0f172a" fontSize="7.5" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
               ESP-WROOM-02
             </text>
-            <text x="45" y="54" fill="#1e293b" fontSize="6.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+            <text x="52" y="54" fill="#1e293b" fontSize="6.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
               ESP32-C3
             </text>
-            <text x="45" y="65" fill="#334155" fontSize="5.5" textAnchor="middle" fontFamily="monospace">
+            <text x="52" y="65" fill="#334155" fontSize="5.5" textAnchor="middle" fontFamily="monospace">
               RISC-V 160MHz
             </text>
-            <text x="45" y="72" fill="#334155" fontSize="4.5" textAnchor="middle">
+            <text x="52" y="72" fill="#334155" fontSize="4.5" textAnchor="middle">
               Wi-Fi 4 + BLE 5.0
             </text>
             {/* RGB Status LED (WS2812B) */}
-            <rect x="40" y="86" width="10" height="10" rx="1.5" fill="#f8fafc" stroke="#64748b" />
+            <rect x="47" y="86" width="10" height="10" rx="1.5" fill="#f8fafc" stroke="#64748b" />
             <circle
-              cx="45"
+              cx="52"
               cy="91"
               r="3.5"
               fill={isPowered ? '#06b6d4' : '#334155'}
               filter={isPowered ? 'drop-shadow(0 0 8px #06b6d4)' : 'none'}
             />
             {/* Tactile Buttons: Reset (RST) and Boot (BOOT) */}
-            <rect x="16" y="106" width="12" height="10" rx="1.5" fill="#e2e8f0" stroke="#64748b" />
-            <circle cx="22" cy="111" r="2.5" fill="#0f172a" />
-            <text x="22" y="102" fill="#94a3b8" fontSize="4.5" fontWeight="bold" textAnchor="middle">RST</text>
-            <rect x="62" y="106" width="12" height="10" rx="1.5" fill="#e2e8f0" stroke="#64748b" />
-            <circle cx="68" cy="111" r="2.5" fill="#0f172a" />
-            <text x="68" y="102" fill="#94a3b8" fontSize="4.5" fontWeight="bold" textAnchor="middle">BOOT</text>
+            <rect x="20" y="106" width="12" height="10" rx="1.5" fill="#e2e8f0" stroke="#64748b" />
+            <circle cx="26" cy="111" r="2.5" fill="#0f172a" />
+            <text x="26" y="102" fill="#94a3b8" fontSize="4.5" fontWeight="bold" textAnchor="middle">RST</text>
+            <rect x="73" y="106" width="12" height="10" rx="1.5" fill="#e2e8f0" stroke="#64748b" />
+            <circle cx="79" cy="111" r="2.5" fill="#0f172a" />
+            <text x="79" y="102" fill="#94a3b8" fontSize="4.5" fontWeight="bold" textAnchor="middle">BOOT</text>
             {/* Type-C USB Port at Bottom */}
-            <rect x="30" y="132" width="30" height="22" rx="3" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.5" />
-            <rect x="36" y="138" width="18" height="10" rx="2" fill="#0f172a" />
-            {/* Left Header Solder Pads & Silkscreen */}
-            <text x="18" y="27" fill="#38bdf8" fontSize="5.5" fontWeight="bold">IO0</text>
-            <text x="18" y="47" fill="#38bdf8" fontSize="5.5" fontWeight="bold">IO1</text>
-            <text x="18" y="67" fill="#38bdf8" fontSize="5.5" fontWeight="bold">IO2</text>
-            <text x="18" y="87" fill="#38bdf8" fontSize="5.5" fontWeight="bold">IO3</text>
-            <text x="18" y="107" fill="#38bdf8" fontSize="5.5" fontWeight="bold">IO4</text>
-            <text x="18" y="127" fill="#38bdf8" fontSize="5.5" fontWeight="bold">IO5</text>
-            {/* Right Header Solder Pads & Silkscreen */}
-            <text x="72" y="27" fill="#ef4444" fontSize="5.5" fontWeight="bold" textAnchor="end">3V3</text>
-            <text x="72" y="47" fill="#94a3b8" fontSize="5.5" fontWeight="bold" textAnchor="end">GND</text>
-            <text x="72" y="67" fill="#f59e0b" fontSize="5.5" fontWeight="bold" textAnchor="end">5V</text>
-            <text x="72" y="87" fill="#38bdf8" fontSize="5.5" fontWeight="bold" textAnchor="end">IO6</text>
-            <text x="72" y="107" fill="#38bdf8" fontSize="5.5" fontWeight="bold" textAnchor="end">IO7</text>
-            <text x="72" y="127" fill="#38bdf8" fontSize="5.5" fontWeight="bold" textAnchor="end">IO8</text>
+            <rect x="37" y="130" width="30" height="22" rx="3" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.5" />
+            <rect x="43" y="136" width="18" height="10" rx="2" fill="#0f172a" />
+            {/* Left Header pads at relX=15 — connector bar on left edge */}
+            <rect x="5" y="22" width="12" height="116" rx="2" fill="#1e3a5f" stroke="#334155" strokeWidth="0.5" />
+            <text x="14" y="30" fill="#38bdf8" fontSize="5" fontWeight="bold" textAnchor="end">3V3</text>
+            <text x="14" y="50" fill="#94a3b8" fontSize="5" fontWeight="bold" textAnchor="end">GND</text>
+            <text x="14" y="70" fill="#38bdf8" fontSize="5" textAnchor="end">IO0</text>
+            <text x="14" y="90" fill="#38bdf8" fontSize="5" textAnchor="end">IO1</text>
+            <text x="14" y="110" fill="#38bdf8" fontSize="5" textAnchor="end">IO2</text>
+            <text x="14" y="130" fill="#38bdf8" fontSize="5" textAnchor="end">IO3</text>
+            {/* Right Header pads at relX=95 — connector bar on right edge */}
+            <rect x="88" y="22" width="12" height="116" rx="2" fill="#1e3a5f" stroke="#334155" strokeWidth="0.5" />
+            <text x="91" y="30" fill="#f59e0b" fontSize="5" fontWeight="bold">5V</text>
+            <text x="91" y="50" fill="#a78bfa" fontSize="5">IO8</text>
+            <text x="91" y="70" fill="#38bdf8" fontSize="5">IO9</text>
+            <text x="91" y="90" fill="#38bdf8" fontSize="5">IO4</text>
+            <text x="91" y="110" fill="#38bdf8" fontSize="5">IO5</text>
+            <text x="91" y="130" fill="#38bdf8" fontSize="5">IO6</text>
           </g>
         );
       }
@@ -1556,9 +1558,9 @@ export const RealisticComponent: React.FC<Props> = ({
             {/* Micro-USB Port at Bottom */}
             <rect x="48" y="152" width="24" height="20" rx="2.5" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.5" />
             <rect x="52" y="158" width="16" height="8" rx="1" fill="#0f172a" />
-            {/* Left and Right Header Pin Bars */}
-            <rect x="8" y="20" width="10" height="135" rx="1.5" fill="#0f172a" stroke="#334155" />
-            <rect x="102" y="20" width="10" height="135" rx="1.5" fill="#0f172a" stroke="#334155" />
+            {/* Left and Right Header Pin Bars — positioned to match pin relX:13 / relX:117 */}
+            <rect x="10" y="20" width="10" height="135" rx="1.5" fill="#0f172a" stroke="#334155" />
+            <rect x="110" y="20" width="10" height="135" rx="1.5" fill="#0f172a" stroke="#334155" />
           </g>
         );
       }
@@ -1584,9 +1586,9 @@ export const RealisticComponent: React.FC<Props> = ({
             <text x="40" y="100" fill="#f8fafc" fontSize="4.5" fontWeight="bold" textAnchor="middle">BOOTSEL</text>
             {/* Micro-USB Port on Top */}
             <rect x="28" y="2" width="24" height="12" rx="2" fill="#cbd5e1" stroke="#64748b" />
-            {/* Castellated Pin Pads on Left & Right */}
-            <rect x="6" y="15" width="6" height="130" fill="#eab308" rx="1" />
-            <rect x="68" y="15" width="6" height="130" fill="#eab308" rx="1" />
+            {/* Castellated Pin Pads on Left & Right — centers align with pin relX:15 / relX:75 */}
+            <rect x="12" y="15" width="6" height="130" fill="#eab308" rx="1" />
+            <rect x="72" y="15" width="6" height="130" fill="#eab308" rx="1" />
             <text x="40" y="138" fill="#f8fafc" fontSize="6.5" fontWeight="bold" textAnchor="middle">PICO W</text>
           </g>
         );
@@ -1602,8 +1604,19 @@ export const RealisticComponent: React.FC<Props> = ({
             <text x="93" y="48" fill="#0f172a" fontSize="6" fontWeight="bold" textAnchor="middle">BROADCOM</text>
             <text x="93" y="56" fill="#1e293b" fontSize="5.5" textAnchor="middle">BCM2711</text>
             <text x="93" y="63" fill="#334155" fontSize="4.5" textAnchor="middle">Cortex-A72</text>
-            {/* 40-Pin GPIO Expansion Header Strip along Top */}
-            <rect x="20" y="8" width="165" height="14" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+            {/* 40-Pin GPIO 2-row header strip across top — rows at y=9 and y=17 */}
+            <rect x="20" y="7" width="190" height="16" rx="2" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+            {/* Top pin row dots y=15, bottom row y=22 */}
+            {[24,46,68,90,112,134,156,178,200].map((x) => (
+              <g key={`gp-top-${x}`}>
+                <rect x={x - 3} y="11" width="6" height="6" rx="1" fill="#eab308" />
+              </g>
+            ))}
+            {[24,46,68,90,112,134,156,178,200].map((x) => (
+              <g key={`gp-bot-${x}`}>
+                <rect x={x - 3} y="18" width="6" height="6" rx="1" fill="#eab308" />
+              </g>
+            ))}
             {/* Gigabit Ethernet Jack on Right Edge */}
             <rect x="175" y="30" width="38" height="34" rx="2" fill="#94a3b8" stroke="#475569" strokeWidth="1.5" />
             <circle cx="205" cy="38" r="2" fill="#eab308" />
@@ -1617,8 +1630,8 @@ export const RealisticComponent: React.FC<Props> = ({
             <rect x="60" y="98" width="16" height="14" rx="2" fill="#cbd5e1" />
             <rect x="10" y="98" width="18" height="14" rx="2" fill="#94a3b8" />
             {/* Silk Logo and Text */}
-            <text x="135" y="45" fill="#f8fafc" fontSize="10" fontWeight="bold">Raspberry Pi 4</text>
-            <text x="135" y="57" fill="#86efac" fontSize="7">Model B 4GB</text>
+            <text x="130" y="52" fill="#f8fafc" fontSize="10" fontWeight="bold">Raspberry Pi 4</text>
+            <text x="130" y="64" fill="#86efac" fontSize="7">Model B 4GB</text>
           </g>
         );
       }
@@ -1638,8 +1651,11 @@ export const RealisticComponent: React.FC<Props> = ({
             <rect x="80" y="48" width="16" height="12" rx="1.5" fill="#cbd5e1" />
             <rect x="104" y="48" width="16" height="12" rx="1.5" fill="#cbd5e1" />
             <rect x="14" y="48" width="18" height="12" rx="1.5" fill="#94a3b8" />
-            {/* 40-Pin Unpopulated/Populated GPIO Header Pads across top */}
-            <rect x="25" y="8" width="98" height="6" fill="#eab308" rx="1" />
+            {/* 40-Pin Unpopulated/Populated GPIO Header Pads — centered at relY=15 */}
+            <rect x="18" y="9" width="104" height="12" fill="#0f172a" rx="1.5" stroke="#334155" strokeWidth="1" />
+            {[20,40,60,80,100].map((x) => (
+              <rect key={x} x={x - 3} y="12" width="6" height="6" rx="1" fill="#eab308" />
+            ))}
             {/* Silk Label */}
             <text x="95" y="24" fill="#ffffff" fontSize="7" fontWeight="bold">Raspberry Pi</text>
             <text x="95" y="33" fill="#86efac" fontSize="6">Zero W</text>

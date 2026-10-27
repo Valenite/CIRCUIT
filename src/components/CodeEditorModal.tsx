@@ -7,7 +7,11 @@ interface Props {
   onClose: () => void;
   component: CircuitComponent | null;
   onSaveCode: (componentId: string, newCode: string) => void;
+  allMcus?: CircuitComponent[];
+  onSelectMcu?: (id: string) => void;
 }
+
+const BAUD_RATES = [300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 250000, 500000, 1000000, 2000000];
 
 const SKETCH_TEMPLATES: Record<string, string> = {
   blink: `// Blink Example Sketch
@@ -71,14 +75,17 @@ export const CodeEditorModal: React.FC<Props> = ({
   onClose,
   component,
   onSaveCode,
+  allMcus = [],
+  onSelectMcu,
 }) => {
-  if (!isOpen || !component) return null;
-
   const [code, setCode] = useState<string>(
-    component.properties.code || SKETCH_TEMPLATES.blink
+    component?.properties.code || SKETCH_TEMPLATES.blink
   );
   const [activeTab, setActiveTab] = useState<'editor' | 'serial'>('editor');
   const [isCompiled, setIsCompiled] = useState(false);
+  const [baudRate, setBaudRate] = useState<number>(9600);
+
+  if (!isOpen || !component) return null;
 
   const handleCompileAndRun = () => {
     onSaveCode(component.id, code);
@@ -97,7 +104,21 @@ export const CodeEditorModal: React.FC<Props> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <span>{component.name} Code Editor</span>
+                {/* MCU picker — shown only when multiple MCUs exist */}
+                {allMcus.length > 1 && onSelectMcu ? (
+                  <select
+                    value={component.id}
+                    onChange={(e) => onSelectMcu(e.target.value)}
+                    className="bg-slate-800 text-white text-sm font-bold rounded-md px-2 py-0.5 border border-slate-600 focus:outline-none focus:border-cyan-500 cursor-pointer"
+                    title="Select microcontroller target"
+                  >
+                    {allMcus.map((mcu) => (
+                      <option key={mcu.id} value={mcu.id}>{mcu.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span>{component.name}</span>
+                )}
                 <span className="text-[10px] uppercase font-mono px-2 py-0.5 bg-slate-800 text-slate-300 rounded">
                   C++ / Wiring
                 </span>
@@ -169,18 +190,36 @@ export const CodeEditorModal: React.FC<Props> = ({
               className="w-full h-full p-6 bg-transparent text-emerald-400 font-mono text-sm leading-relaxed resize-none focus:outline-none"
             />
           ) : (
-            <div className="w-full h-full p-6 font-mono text-xs text-slate-300 overflow-y-auto space-y-2">
-              <div className="text-slate-500 border-b border-slate-800 pb-2">
-                --- Serial Monitor (Baud Rate: 115200) ---
-              </div>
-              <div>[SYSTEM] Board connected on Virtual COM Port. Clock 16.000 MHz.</div>
-              <div>[MCU] GPIO Pin 13 set to OUTPUT.</div>
-              <div className="text-emerald-400">[LOOP] Pulse cycle running synchronously with circuit solver.</div>
-              {component.properties.serialLogs?.map((log, i) => (
-                <div key={i} className="text-sky-400">
-                  {log}
+            <div className="w-full h-full flex flex-col">
+              {/* Serial Monitor Toolbar with Baud Rate */}
+              <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 border-b border-slate-800">
+                <span className="text-xs text-slate-500 font-mono">Serial Output</span>
+                <div className="flex items-center space-x-2">
+                  <label className="text-xs text-slate-400 font-medium">Baud Rate:</label>
+                  <select
+                    value={baudRate}
+                    onChange={(e) => setBaudRate(Number(e.target.value))}
+                    className="bg-slate-800 text-slate-200 text-xs rounded-md px-2 py-0.5 border border-slate-700 focus:outline-none focus:border-cyan-500 cursor-pointer"
+                  >
+                    {BAUD_RATES.map((rate) => (
+                      <option key={rate} value={rate}>{rate.toLocaleString()}</option>
+                    ))}
+                  </select>
                 </div>
-              ))}
+              </div>
+              <div className="flex-1 p-4 font-mono text-xs text-slate-300 overflow-y-auto space-y-2">
+                <div className="text-slate-500 border-b border-slate-800 pb-2">
+                  --- Serial Monitor (Baud Rate: {baudRate.toLocaleString()}) ---
+                </div>
+                <div>[SYSTEM] Board connected on Virtual COM Port. Clock 16.000 MHz.</div>
+                <div>[MCU] GPIO Pin 13 set to OUTPUT.</div>
+                <div className="text-emerald-400">[LOOP] Pulse cycle running synchronously with circuit solver.</div>
+                {component.properties.serialLogs?.map((log: string, i: number) => (
+                  <div key={i} className="text-sky-400">
+                    {log}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -189,6 +228,8 @@ export const CodeEditorModal: React.FC<Props> = ({
         <div className="px-6 py-3.5 border-t border-slate-800 bg-slate-950 flex items-center justify-between">
           <div className="flex items-center space-x-2 text-xs text-slate-400">
             <span>Target: {component.name}</span>
+            <span className="text-slate-600">•</span>
+            <span className="text-slate-500">{baudRate.toLocaleString()} baud</span>
           </div>
           <div className="flex items-center space-x-2">
             <button

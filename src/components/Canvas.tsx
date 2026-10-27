@@ -602,6 +602,28 @@ export const Canvas: React.FC<Props> = ({
                   />
                 )}
 
+                {/* ── Terminal endpoint dots — always visible so users can see exactly where wires land ── */}
+                <circle
+                  cx={posA.x}
+                  cy={posA.y}
+                  r="4.5"
+                  fill={wire.color || '#3b82f6'}
+                  stroke="#070b14"
+                  strokeWidth="1.5"
+                  opacity="0.92"
+                  style={{ pointerEvents: 'none' }}
+                />
+                <circle
+                  cx={posB.x}
+                  cy={posB.y}
+                  r="4.5"
+                  fill={wire.color || '#3b82f6'}
+                  stroke="#070b14"
+                  strokeWidth="1.5"
+                  opacity="0.92"
+                  style={{ pointerEvents: 'none' }}
+                />
+
                 {/* ================= DRAGGABLE WAYPOINT BEND HANDLES ================= */}
                 {(isSelected || isHovered) && (
                   <g>

@@ -68,10 +68,26 @@ export function App() {
   }, [simRunning]);
 
   // Microcontroller runtime simulation step
-  const mcuComponent = useMemo(
-    () => components.find((c) => c.type === 'arduino_uno' || c.type === 'esp32') || null,
+  const MCU_TYPES = new Set([
+    'arduino_uno', 'esp32', 'arduino_nano', 'arduino_mega', 'arduino_pro_mini',
+    'esp32_s3', 'esp32_c3', 'nodemcu_esp8266', 'raspberry_pi_pico',
+    'raspberry_pi_pico_w', 'raspberry_pi_4', 'raspberry_pi_zero_w',
+    'arduino_due', 'stm32_bluepill', 'teensy_40', 'attiny85', 'esp32_cam',
+  ]);
+
+  const allMcus = useMemo(
+    () => components.filter((c) => MCU_TYPES.has(c.type)),
     [components]
   );
+
+  // Track which MCU the code editor targets (defaults to first MCU found)
+  const [mcuEditorTargetId, setMcuEditorTargetId] = useState<string | null>(null);
+
+  const mcuComponent = useMemo(() => {
+    if (allMcus.length === 0) return null;
+    // Use the explicitly chosen target if it still exists, else fall back to first
+    return allMcus.find((c) => c.id === mcuEditorTargetId) ?? allMcus[0];
+  }, [allMcus, mcuEditorTargetId]);
 
   // Solve circuit simulation
   const simResult = useMemo(() => {
@@ -322,7 +338,7 @@ export function App() {
         onOpenBom={() => setIsBomOpen(true)}
         onAutoWire={handleAutoWire}
         onOpenCodeEditor={() => setIsCodeEditorOpen(true)}
-        hasMcu={Boolean(mcuComponent)}
+        hasMcu={Boolean(allMcus.length > 0)}
         onCleanAllWires={handleCleanAllWires}
         defaultRoutingMode={defaultRoutingMode}
         onToggleDefaultRoutingMode={() =>
@@ -424,6 +440,8 @@ export function App() {
         onClose={() => setIsCodeEditorOpen(false)}
         component={mcuComponent}
         onSaveCode={(id, code) => handleUpdateComponentProperties(id, { code })}
+        allMcus={allMcus}
+        onSelectMcu={(id) => setMcuEditorTargetId(id)}
       />
     </div>
   );
