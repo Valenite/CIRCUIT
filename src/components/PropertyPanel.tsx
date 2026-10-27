@@ -163,6 +163,24 @@ export const PropertyPanel: React.FC<Props> = ({
         {/* Scrollable Properties */}
         <div className="px-3.5 py-3 space-y-3 max-h-72 overflow-y-auto">
 
+          {/* Orientation / Rotate Button in the menu */}
+          {onRotate && (
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
+              <span className="text-xs text-slate-300 font-semibold flex items-center gap-1.5">
+                <RotateCw className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Rotation</span>
+              </span>
+              <button
+                onClick={() => onRotate(component.id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 hover:border-cyan-300 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Rotate 90° Clockwise"
+              >
+                <RotateCw className="w-3.5 h-3.5" />
+                <span>Rotate 90° ({(component.rotation || 0)}°)</span>
+              </button>
+            </div>
+          )}
+
           {/* Boolean: state toggle */}
           {component.properties.state !== undefined && (
             <div className="flex items-center justify-between">
@@ -230,9 +248,10 @@ export const PropertyPanel: React.FC<Props> = ({
 
           {relevantNumericProps.length === 0 &&
             component.properties.state === undefined &&
-            component.properties.ledColor === undefined && (
+            component.properties.ledColor === undefined &&
+            !onRotate && (
               <div className="text-center py-4 text-xs text-slate-600 italic">
-                No editable properties
+                No additional editable properties
               </div>
             )}
         </div>

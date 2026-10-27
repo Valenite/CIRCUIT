@@ -748,37 +748,6 @@ export const Canvas: React.FC<Props> = ({
                   />
                 )}
 
-                {/* On-Canvas Rotation Handle (Click to Rotate 90°) */}
-                {isSelected && (
-                  <g
-                    transform={`translate(${w / 2}, -20)`}
-                    className="cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRotateComponent(comp.id);
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                  >
-                    <circle
-                      cx="0"
-                      cy="0"
-                      r="12"
-                      fill="#0b1329"
-                      stroke="#00f0ff"
-                      strokeWidth="1.8"
-                      filter="drop-shadow(0 2px 8px rgba(0,240,255,0.5))"
-                    />
-                    <path
-                      d="M -4 -2 A 5 5 0 1 1 -4 3 M -4 -2 L -4 3 L 1 3"
-                      stroke="#00f0ff"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
-                  </g>
-                )}
-
                 {/* Component Name Badge with Dark Backdrop to Prevent Wire Clutter */}
                 <g transform={`translate(${w / 2}, ${h + 18})`} className="pointer-events-none select-none">
                   <rect
