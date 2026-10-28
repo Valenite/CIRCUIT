@@ -21,6 +21,7 @@ import { BomModal } from './components/BomModal';
 import { AiComponentModal } from './components/AiComponentModal';
 import { CodeEditorModal } from './components/CodeEditorModal';
 import { SensorStimulusPanel } from './components/SensorStimulusPanel';
+import { FloatingSerialMonitor } from './components/FloatingSerialMonitor';
 import { PropertyPanel } from './components/PropertyPanel';
 
 export function App() {
@@ -46,6 +47,7 @@ export function App() {
   const [isBomOpen, setIsBomOpen] = useState<boolean>(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
   const [isCodeEditorOpen, setIsCodeEditorOpen] = useState<boolean>(false);
+  const [isSerialMonitorOpen, setIsSerialMonitorOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Time ticker for dynamic AC sources & MCU cycles
@@ -92,12 +94,16 @@ export function App() {
   // Solve circuit simulation
   const simResult = useMemo(() => {
     const res = solveCircuit(components, wires, simRunning, clockMs);
-    // If MCU has code, execute pin overrides
-    if (mcuComponent && mcuComponent.properties.code && simRunning) {
+    // If MCU exists, execute firmware cycles and live serial telemetry
+    if (mcuComponent && simRunning) {
+      const codeToRun =
+        mcuComponent.properties.code ||
+        `// Default live firmware on ${mcuComponent.name}\nvoid setup() { Serial.begin(115200); }\nvoid loop() { delay(250); }`;
       const mcuState = mcuRuntime.executeCodeStep(
         mcuComponent.id,
-        mcuComponent.properties.code,
-        clockMs
+        codeToRun,
+        clockMs,
+        components
       );
       Object.assign(res.nodeVoltages, mcuState.pinVoltages);
       if (!res.componentOutputs[mcuComponent.id]) {
@@ -338,6 +344,8 @@ export function App() {
         onOpenBom={() => setIsBomOpen(true)}
         onAutoWire={handleAutoWire}
         onOpenCodeEditor={() => setIsCodeEditorOpen(true)}
+        isSerialMonitorOpen={isSerialMonitorOpen}
+        onToggleSerialMonitor={() => setIsSerialMonitorOpen((prev) => !prev)}
         hasMcu={Boolean(allMcus.length > 0)}
         onCleanAllWires={handleCleanAllWires}
         defaultRoutingMode={defaultRoutingMode}
@@ -418,6 +426,7 @@ export function App() {
             components={components}
             isRunning={simRunning}
             onUpdateComponentProperties={handleUpdateComponentProperties}
+            onOpenSerialMonitor={() => setIsSerialMonitorOpen(true)}
           />
         </main>
       </div>
@@ -440,6 +449,16 @@ export function App() {
         onClose={() => setIsCodeEditorOpen(false)}
         component={mcuComponent}
         onSaveCode={(id, code) => handleUpdateComponentProperties(id, { code })}
+        allMcus={allMcus}
+        onSelectMcu={(id) => setMcuEditorTargetId(id)}
+        onOpenFloatingSerial={() => setIsSerialMonitorOpen(true)}
+      />
+
+      {/* Live Floating / Dockable Serial Monitor (Side-by-Side Canvas Telemetry) */}
+      <FloatingSerialMonitor
+        isOpen={isSerialMonitorOpen}
+        onClose={() => setIsSerialMonitorOpen(false)}
+        mcuComponent={mcuComponent}
         allMcus={allMcus}
         onSelectMcu={(id) => setMcuEditorTargetId(id)}
       />

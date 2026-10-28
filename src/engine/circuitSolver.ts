@@ -464,6 +464,21 @@ export function solveCircuit(
         addConductance(nCh2, nGnd, 1 / 1e6);
         break;
       }
+      case 'tp4056_charger': {
+        const nInPos = netIndices[find(`${comp.id}:in_pos`)];
+        const nInNeg = netIndices[find(`${comp.id}:in_neg`)];
+        const nOutPos = netIndices[find(`${comp.id}:out_pos`)];
+        const nOutNeg = netIndices[find(`${comp.id}:out_neg`)];
+        const nBatPos = netIndices[find(`${comp.id}:bat_pos`)];
+        const nBatNeg = netIndices[find(`${comp.id}:bat_neg`)];
+        // Charger: IN feeds BAT, BAT feeds OUT, grounds tied
+        addConductance(nInPos, nBatPos, 1 / 0.5); // charging path
+        addConductance(nBatPos, nOutPos, 1 / 0.1); // battery to output
+        addConductance(nInNeg, nOutNeg, 1 / 0.001); // ground tie
+        addConductance(nBatNeg, nOutNeg, 1 / 0.001); // ground tie
+        break;
+      }
+
       default:
         break;
     }
@@ -733,6 +748,28 @@ export function solveCircuit(
         };
         break;
       }
+      case 'tp4056_charger': {
+        const vInP = result.nodeVoltages[`${comp.id}:in_pos`] || 0;
+        const vInN = result.nodeVoltages[`${comp.id}:in_neg`] || 0;
+        const vOutP = result.nodeVoltages[`${comp.id}:out_pos`] || 0;
+        const vOutN = result.nodeVoltages[`${comp.id}:out_neg`] || 0;
+        const vBatP = result.nodeVoltages[`${comp.id}:bat_pos`] || 0;
+        const vBatN = result.nodeVoltages[`${comp.id}:bat_neg`] || 0;
+        const inputV = vInP - vInN;
+        const outputV = vOutP - vOutN;
+        const batV = vBatP - vBatN;
+        const isChg = inputV > 3.5 && batV < 4.25;
+        result.componentOutputs[comp.id] = {
+          powered: inputV > 3.5,
+          current: inputV > 3.5 ? 0.5 : 0,
+          voltageDrop: inputV - outputV,
+          isCharging: isChg,
+          batteryVoltage: batV,
+          outputVoltage: outputV,
+        };
+        break;
+      }
+
       default: {
         if (!result.componentOutputs[comp.id]) {
           result.componentOutputs[comp.id] = {

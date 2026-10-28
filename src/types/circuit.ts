@@ -204,6 +204,10 @@ export interface SimulationResult {
       sensorReading?: string | number;
       motorAActive?: boolean;
       motorBActive?: boolean;
+      isCharging?: boolean;
+      batteryVoltage?: number;
+      outputVoltage?: number;
+      [key: string]: any;
     }
   >;
   multimeterReading?: {

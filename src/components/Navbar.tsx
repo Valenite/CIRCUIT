@@ -13,6 +13,7 @@ import {
   Sparkles,
   Wand2,
   Code2,
+  Terminal,
   CornerDownRight,
   Spline,
   Grid,
@@ -29,6 +30,8 @@ interface Props {
   onOpenBom: () => void;
   onAutoWire: () => void;
   onOpenCodeEditor: () => void;
+  isSerialMonitorOpen?: boolean;
+  onToggleSerialMonitor?: () => void;
   hasMcu: boolean;
   onCleanAllWires: () => void;
   defaultRoutingMode: WireRoutingType;
@@ -48,6 +51,8 @@ export const Navbar: React.FC<Props> = ({
   onOpenBom,
   onAutoWire,
   onOpenCodeEditor,
+  isSerialMonitorOpen = false,
+  onToggleSerialMonitor,
   hasMcu,
   onCleanAllWires,
   defaultRoutingMode,
@@ -120,13 +125,29 @@ export const Navbar: React.FC<Props> = ({
             <span>Schematic</span>
           </button>
           {hasMcu && (
-            <button
-              onClick={onOpenCodeEditor}
-              className="flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-emerald-400 hover:bg-slate-900 transition-all cursor-pointer"
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              <span>Firmware</span>
-            </button>
+            <>
+              <button
+                onClick={onOpenCodeEditor}
+                className="flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-emerald-400 hover:bg-slate-900 transition-all cursor-pointer"
+                title="Open Firmware Code Editor"
+              >
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Firmware</span>
+              </button>
+              <button
+                onClick={onToggleSerialMonitor}
+                className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  isSerialMonitorOpen
+                    ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/50 shadow-sm'
+                    : 'text-cyan-400 hover:bg-slate-900'
+                }`}
+                title="Toggle Live Serial Monitor (Side-by-Side with Canvas)"
+              >
+                <Terminal className="w-3.5 h-3.5" />
+                <span>Serial</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+              </button>
+            </>
           )}
         </div>
 

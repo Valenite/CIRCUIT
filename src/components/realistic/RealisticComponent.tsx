@@ -1351,31 +1351,54 @@ export const RealisticComponent: React.FC<Props> = ({
       }
 
       case 'tp4056_charger': {
+        const pads = [
+          { name: 'IN+', x: 14, y: 18, labelX: 14, labelY: 10, align: 'middle' as const, color: '#fca5a5' },
+          { name: 'IN-', x: 14, y: 62, labelX: 14, labelY: 72, align: 'middle' as const, color: '#cbd5e1' },
+          { name: 'OUT+', x: 86, y: 16, labelX: 77, labelY: 18, align: 'end' as const, color: '#fca5a5' },
+          { name: 'B+', x: 86, y: 32, labelX: 77, labelY: 34, align: 'end' as const, color: '#fde047' },
+          { name: 'B-', x: 86, y: 48, labelX: 77, labelY: 50, align: 'end' as const, color: '#93c5fd' },
+          { name: 'OUT-', x: 86, y: 64, labelX: 77, labelY: 66, align: 'end' as const, color: '#cbd5e1' },
+        ];
         return (
           <g>
             {/* Blue Charger PCB */}
-            <rect x="5" y="5" width="90" height="70" rx="4" fill="#1d4ed8" stroke="#1e40af" strokeWidth="2" />
+            <rect x="4" y="4" width="92" height="72" rx="4" fill="#1d4ed8" stroke="#1e40af" strokeWidth="2" />
+            <rect x="7" y="7" width="86" height="66" rx="2" fill="#1e40af" fillOpacity="0.3" />
             {/* USB-C Receptacle */}
-            <rect x="2" y="24" width="22" height="22" rx="3" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.5" />
+            <rect x="2" y="24" width="20" height="22" rx="3" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.5" />
             <rect x="6" y="30" width="10" height="10" rx="2" fill="#0f172a" />
             {/* TP4056 Linear Charge Management IC */}
-            <rect x="36" y="26" width="22" height="16" rx="1.5" fill="#0f172a" stroke="#1e293b" />
-            <text x="47" y="37" fill="#94a3b8" fontSize="5" textAnchor="middle" fontFamily="monospace">TP4056</text>
+            <rect x="30" y="24" width="20" height="16" rx="1.5" fill="#0f172a" stroke="#1e293b" />
+            <text x="40" y="34" fill="#94a3b8" fontSize="4.5" textAnchor="middle" fontFamily="monospace">TP4056</text>
             {/* DW01A Battery Protection IC & 8205A MOSFET */}
-            <rect x="64" y="20" width="12" height="10" rx="1" fill="#0f172a" />
-            <rect x="64" y="34" width="14" height="12" rx="1" fill="#0f172a" />
+            <rect x="54" y="20" width="11" height="10" rx="1" fill="#0f172a" />
+            <text x="59.5" y="26.5" fill="#64748b" fontSize="3" textAnchor="middle" fontFamily="monospace">DW01</text>
+            <rect x="53" y="34" width="13" height="12" rx="1" fill="#0f172a" />
+            <text x="59.5" y="41.5" fill="#64748b" fontSize="3" textAnchor="middle" fontFamily="monospace">8205A</text>
             {/* Dual Status LEDs: CHRG (Red) & STDBY (Blue) */}
             <circle cx="34" cy="54" r="3" fill={output.powered ? '#ef4444' : '#7f1d1d'} filter={output.powered ? 'drop-shadow(0 0 6px #ef4444)' : 'none'} />
-            <text x="34" y="63" fill="#fca5a5" fontSize="4.5" textAnchor="middle">CHRG</text>
+            <text x="34" y="63" fill="#fca5a5" fontSize="4" textAnchor="middle" fontWeight="bold">CHRG</text>
             <circle cx="48" cy="54" r="3" fill={output.powered ? '#3b82f6' : '#1e3a8a'} filter={output.powered ? 'drop-shadow(0 0 6px #3b82f6)' : 'none'} />
-            <text x="48" y="63" fill="#93c5fd" fontSize="4.5" textAnchor="middle">STDBY</text>
-            {/* Solder Pads */}
-            <text x="15" y="16" fill="#f8fafc" fontSize="6" fontWeight="bold">IN+</text>
-            <text x="15" y="66" fill="#f8fafc" fontSize="6" fontWeight="bold">IN-</text>
-            <text x="82" y="16" fill="#f8fafc" fontSize="6" fontWeight="bold" textAnchor="end">OUT+</text>
-            <text x="82" y="32" fill="#f8fafc" fontSize="6" fontWeight="bold" textAnchor="end">B+</text>
-            <text x="82" y="48" fill="#f8fafc" fontSize="6" fontWeight="bold" textAnchor="end">B-</text>
-            <text x="82" y="66" fill="#f8fafc" fontSize="6" fontWeight="bold" textAnchor="end">OUT-</text>
+            <text x="48" y="63" fill="#93c5fd" fontSize="4" textAnchor="middle" fontWeight="bold">STDBY</text>
+            {/* Solder eyelet pads and crisp silkscreen labels */}
+            {pads.map((p) => (
+              <g key={p.name}>
+                <text
+                  x={p.labelX}
+                  y={p.labelY}
+                  fill={p.color}
+                  fontSize="5"
+                  fontWeight="bold"
+                  textAnchor={p.align}
+                  dominantBaseline="central"
+                  fontFamily="ui-monospace, monospace"
+                >
+                  {p.name}
+                </text>
+                <circle cx={p.x} cy={p.y} r="4.2" fill="#ca8a04" stroke="#fde047" strokeWidth="1" />
+                <circle cx={p.x} cy={p.y} r="1.8" fill="#070a12" />
+              </g>
+            ))}
           </g>
         );
       }
